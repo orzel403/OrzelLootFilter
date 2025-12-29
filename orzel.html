@@ -1,0 +1,2592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Items Grid — Inline Editing</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background-color: #1a1a1a !important;
+      color: #e0e0e0 !important;
+      --bs-body-bg: #1a1a1a;
+      --bs-body-color: #e0e0e0;
+    }
+    .dark-mode * {
+      border-color: #444;
+    }
+    .dark-mode .card {
+      background-color: #2a2a2a;
+      border-color: #444;
+      color: #e0e0e0;
+    }
+    .dark-mode .card-header {
+      background-color: #2a2a2a;
+      border-color: #444;
+      color: #e0e0e0;
+    }
+    .dark-mode .card-body {
+      background-color: #2a2a2a;
+      color: #e0e0e0;
+    }
+    .dark-mode .filters-card {
+      background-color: #252525;
+      border-color: #444;
+    }
+    .dark-mode .filters-toggle {
+      color: #e0e0e0;
+    }
+    .dark-mode .filters-toggle:hover {
+      background-color: #333;
+    }
+    .dark-mode .group-header {
+      background-color: #333 !important;
+      color: #e0e0e0;
+    }
+    .dark-mode .table {
+      color: #e0e0e0;
+      --bs-table-bg: #1a1a1a;
+      --bs-table-color: #e0e0e0;
+    }
+    .dark-mode .table thead th {
+      color: #e0e0e0;
+      background-color: #2a2a2a;
+      border-color: #444;
+    }
+    .dark-mode .table tbody td {
+      color: #e0e0e0;
+      border-color: #444;
+    }
+    .dark-mode .table-striped > tbody > tr:nth-of-type(odd):not(.group-header-row) > * {
+      background-color: #2a2a2a;
+      color: #e0e0e0;
+      --bs-table-bg-type: #2a2a2a;
+    }
+    .dark-mode .table-striped > tbody > tr:nth-of-type(even):not(.group-header-row) > * {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+    .dark-mode .table-hover > tbody > tr:hover > * {
+      background-color: #333;
+      color: #e0e0e0;
+    }
+    .dark-mode .form-label {
+      color: #e0e0e0;
+    }
+    .dark-mode .form-control,
+    .dark-mode .form-select {
+      background-color: #2a2a2a;
+      border-color: #444;
+      color: #e0e0e0;
+    }
+    .dark-mode .form-control::placeholder {
+      color: #888;
+    }
+    .dark-mode .form-control:focus,
+    .dark-mode .form-select:focus {
+      background-color: #333;
+      border-color: #666;
+      color: #e0e0e0;
+    }
+    .dark-mode .form-select option {
+      background-color: #2a2a2a;
+      color: #e0e0e0;
+    }
+    .dark-mode .form-check-label {
+      color: #e0e0e0;
+    }
+    .dark-mode .btn {
+      border-color: #444;
+    }
+    .dark-mode .btn-outline-secondary {
+      color: #e0e0e0;
+      border-color: #666;
+    }
+    .dark-mode .btn-outline-secondary:hover {
+      background-color: #444;
+      color: #fff;
+    }
+    .dark-mode .dropdown-menu {
+      background-color: #2a2a2a;
+      border-color: #444;
+    }
+    .dark-mode .dropdown-item {
+      color: #e0e0e0;
+    }
+    .dark-mode .dropdown-item:hover {
+      background-color: #333;
+      color: #e0e0e0;
+    }
+    .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h4, .dark-mode h5, .dark-mode h6 {
+      color: #e0e0e0;
+    }
+
+    .code-cell {
+      color: #b8c3cd !important;
+    }
+    .dark-mode .code-cell {
+      color: #494c4e !important;
+    }
+
+    /* Custom widths for specific columns */
+    .code-col{ width: 50px;}
+    .type-col{ width: 80px;}
+    .rarity-col{ width: 100px;}
+    .tier-col{ width: 50px;}
+    .name-col{ width: 300px;}
+    .might-col{ width: 40px; text-align: right;}
+    .corrupt-col{ width: 150px;}
+    .level-col{ width: 80px;}
+    .craft-col{ width: 60px;}
+
+    /* Tighter spacing between specific columns */
+    th.code-col, td.code-col { padding-right: 0.35rem; }
+    th.type-col, td.type-col { padding-left: 0.35rem; }
+    th.might-col, td.might-col { padding-right: 0.35rem; }
+    th.corrupt-col, td.corrupt-col { padding-left: 0.35rem; }
+
+    /* Checkbox alignment tweaks */
+    td.might-col input[type="checkbox"],
+    td.craft-col input[type="checkbox"] {
+      margin: 0;
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+      accent-color: #dc063b;
+    }
+
+    /* Remove Bootstrap table cell inset box-shadow that interferes with striping */
+    .table>:not(caption)>*>* {
+      box-shadow: none !important;
+    }
+    
+    /* Table header styling - h2 like */
+    thead th {
+      cursor: pointer;
+      font-size: 1.5rem;
+      font-weight: 600;
+      padding: 12px 8px;
+    }
+    .table thead tr:hover {
+      background-color: transparent !important;
+    }
+    .dark-mode .table thead tr:hover th {
+      background-color: #2a2a2a !important;
+    }
+    
+    /* Group header styling - h3 like */
+    .group-header {
+      background-color: #e3f2fd !important;
+      font-size: 1.25rem;
+      font-weight: 600;
+      text-align: left;
+      padding: 12px 8px;
+    }
+    
+    th { cursor: pointer; }
+    .name-unique { color: #8B4513 !important; font-weight: bold; }
+    .name-set { color: #228B22 !important; font-weight: bold; }
+    .name-map { color: #97e12e !important; font-weight: bold; }
+    .name-map-white { color: #ffffff !important; font-weight: bold; }
+    .dark-mode .name-unique { color: #d4a574 !important; }
+    .dark-mode .name-set { color: #4ade80 !important; }
+    .dark-mode .name-map-white { color: #e0e0e0 !important; }
+    .name-filter-cell { font-weight: 700; color: #8B4513; white-space: nowrap; }
+    .map-filter-cell { font-weight: 700; white-space: nowrap; }
+    .map-tier-blue { color: #5b9bd5; font-weight: 700; }
+    .map-tier-yellow { color: #ffd700; font-weight: 700; }
+    .map-tier-white { color: #ffffff; font-weight: 700; }
+    .map-level-low { color: #dc3545; font-weight: 700; }
+    .map-level-mid { color: #0d6efd; font-weight: 700; }
+    .map-level-god { color: #28a745; font-weight: 700; }
+    .dark-mode .map-tier-blue { color: #6ea8fe; }
+    .dark-mode .map-tier-yellow { color: #ffed4e; }
+    .dark-mode .map-tier-white { color: #e0e0e0; }
+    .dark-mode .map-level-low { color: #dc3545; }
+    .dark-mode .map-level-mid { color: #6ea8fe; }
+    .dark-mode .map-level-god { color: #28a745; }
+    .filter-name-text { color: #8B4513; font-weight: 700; }
+    .filter-bracket { font-weight: 800; }
+    .filter-bracket-mid { color: #d4b106; }
+    .filter-bracket-god { color: #9b59b6; }
+    .filter-bracket-mc { color: #dc3545; }
+    .filter-mc-suffix { color: #cfcfcf; font-weight: 700; margin-left: 2px; }
+    .dark-mode .filter-name-text { color: #d4a574; }
+    .dark-mode .filter-mc-suffix { color: #5c5c5c; }
+    .tag-pill { font-size: 0.8rem; }
+    /* Red tags with white separators for Corrupt column */
+    .mc-tag { color: #dc063b; }
+    .mc-sep { color: #ffffff; }
+    /* Borderless pencil dropdown toggle */
+    .corrupt-edit-toggle {
+      padding: 0;
+      border: none;
+      background: transparent;
+      line-height: 1;
+    }
+    /* Disable text selection inside MC dropdown */
+    .dropdown-menu.noselect {
+      user-select: none;
+    }
+    .dropdown-toggle-no-caret::after { display: none !important; }
+    .filters-card {
+      background-color: #f8f9fa;
+      border: 1px solid #e0e0e0;
+    }
+    .filters-toggle {
+      cursor: pointer;
+      user-select: none;
+    }
+    .filters-toggle:hover {
+      background-color: #e9ecef;
+    }
+    
+    /* Sticky header container */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: #f5f5f5;
+      margin: 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .dark-mode .sticky-header {
+      background-color: #252525;
+      border-bottom-color: #444;
+    }
+    
+    /* Sticky header table - matches main table */
+    .sticky-header-table {
+      width: 100%;
+      margin: 0;
+      table-layout: fixed;
+    }
+    .sticky-header-table th {
+      cursor: pointer;
+      font-size: 1.5rem;
+      font-weight: 600;
+      padding: 12px 8px;
+      text-align: left;
+      background-color: transparent;
+      border: none;
+    }
+    .dark-mode .sticky-header-table th {
+      color: #e0e0e0;
+    }
+    
+    /* Hide original thead */
+    .main-table thead {
+      visibility: hidden;
+      height: 0;
+      line-height: 0;
+    }
+    .main-table thead th {
+      padding: 0;
+      margin: 0;
+      border: none;
+    }
+    
+    /* Sticky header table - matches main table */
+    .sticky-header-table {
+      width: 100%;
+      margin: 0;
+      table-layout: fixed;
+    }
+    .sticky-header-table th {
+      cursor: pointer;
+      font-size: 1.5rem;
+      font-weight: 600;
+      padding: 12px 8px;
+      text-align: left;
+      background-color: transparent;
+      border: none;
+    }
+    .dark-mode .sticky-header-table th {
+      color: #e0e0e0;
+    }
+    
+    /* Hide original thead */
+    .main-table thead {
+      visibility: hidden;
+      height: 0;
+      line-height: 0;
+    }
+    .main-table thead th {
+      padding: 0;
+      margin: 0;
+      border: none;
+    }
+    
+    /* Sticky header table - matches main table */
+    .sticky-header-table {
+      width: 100%;
+      margin: 0;
+      table-layout: fixed;
+    }
+    .sticky-header-table th {
+      cursor: pointer;
+      font-size: 1.5rem;
+      font-weight: 600;
+      padding: 12px 8px;
+      text-align: left;
+      background-color: transparent;
+      border: none;
+    }
+    .dark-mode .sticky-header-table th {
+      color: #e0e0e0;
+    }
+    
+    /* Hide original thead */
+    .main-table thead {
+      visibility: hidden;
+      height: 0;
+      line-height: 0;
+    }
+    .main-table thead th {
+      padding: 0;
+      margin: 0;
+      border: none;
+    }
+    
+    /* Full width table */
+    #app .table-responsive {
+      margin: 0;
+      padding: 0;
+    }
+    
+    #app {
+      padding: 0;
+    }
+    /* Compact clear buttons */
+    .btn-clear {
+      padding: 0 0.35rem;
+      font-size: 0.75rem;
+      line-height: 1.2rem;
+      border-radius: 0.25rem;
+    }
+    .header-search {
+      flex: 1 1 auto;
+      max-width: none;
+      min-width: 0;
+    }
+    html, body { overflow-x: clip; }
+    
+    /* Tab styling */
+    .nav-tabs {
+      border-bottom: 2px solid #dee2e6;
+      margin-bottom: 0;
+    }
+    .dark-mode .nav-tabs {
+      border-bottom-color: #444;
+    }
+    .nav-link {
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #495057;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    .dark-mode .nav-link {
+      color: #adb5bd;
+    }
+    .nav-link:hover {
+      border-bottom-color: #ccc;
+      color: #212529;
+    }
+    .dark-mode .nav-link:hover {
+      border-bottom-color: #666;
+      color: #e0e0e0;
+    }
+    .nav-link.active {
+      border-bottom-color: #0d6efd;
+      color: #0d6efd;
+      background-color: transparent;
+    }
+    .dark-mode .nav-link.active {
+      color: #6ea8fe;
+      border-bottom-color: #6ea8fe;
+    }
+    .tab-content {
+      margin-top: 0;
+    }
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active,
+    .tab-pane.show {
+      display: block;
+      animation: fadeIn 0.15s ease-in;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    
+    /* Notification system */
+    #notification-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+    }
+    
+    .notification {
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-out 4.7s forwards;
+      min-width: 300px;
+    }
+    
+    .notification-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    .notification-message {
+      flex-grow: 1;
+      word-wrap: break-word;
+    }
+    
+    .notification-error {
+      background-color: #dc3545;
+      color: white;
+      border-left: 4px solid #a71d2a;
+    }
+    
+    .notification-warning {
+      background-color: #ffc107;
+      color: #000;
+      border-left: 4px solid #d39e00;
+    }
+    
+    .notification-info {
+      background-color: #0dcaf0;
+      color: #000;
+      border-left: 4px solid #0aa2c0;
+    }
+    
+    .notification-success {
+      background-color: #198754;
+      color: white;
+      border-left: 4px solid #146c43;
+    }
+    
+    .dark-mode .notification-warning {
+      background-color: #f59e0b;
+      color: white;
+    }
+    
+    .dark-mode .notification-info {
+      background-color: #06b6d4;
+      color: white;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body class="dark-mode">
+  <!-- Notification Container -->
+  <div id="notification-container"></div>
+  
+  <div id="app">
+    <div class="sticky-header">
+      <div class="d-flex align-items-center justify-content-between mb-3" style="padding: 30px;padding-bottom:0px;">
+        <h1 class="h4 mb-0">Orzel Loot Filter Editor</h1>
+        <div class="d-flex gap-2 align-items-center flex-grow-1">
+          <input type="search" style="width:100%;margin-left: 10px;" class="form-control form-control-sm header-search" :placeholder="'Quick search by name (' + activeTab + ')'" v-model.trim="headerSearch" />
+          <button class="btn btn-outline-primary btn-clear btn-sm" style="height:31px;width:140px;" @click="clearAllFilters">Clear filters</button>
+          <button class="btn btn-outline-secondary btn-sm" @click="toggleNameDisplay" :title="nameDisplayMode === 'short' ? 'Currently showing: short game names' : 'Currently showing: filter names'">
+            {{ nameDisplayMode === 'short' ? '👻' : '😈' }}
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" @click="toggleDarkMode" :title="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+            {{ darkMode ? '🌙' : '☀️' }}
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" @click="confirmReset">Reset</button>
+          <button class="btn btn-outline-secondary btn-sm" @click="selectWorkingFolder" title="Set working folder" style="margin-left: 15px;">📁</button>
+          <div class="btn-group">
+            <button class="btn btn-danger btn-sm" @click="triggerLoad">Load</button>
+            <button class="btn btn-danger btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" @click.prevent="pickAndLoadFile">Load file...</a></li>
+            </ul>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-success btn-sm" @click="triggerSave">Save</button>
+            <button class="btn btn-success btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" @click.prevent="exportLevels">Save item's levels</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="exportMightCorrupt">Save might corrupts</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="exportMapLevels">Save maps</a></li>
+            </ul>
+          </div>
+          <input ref="fileInput" type="file" class="d-none" @change="handleFileSelected" accept=".filter,.json,.txt,.cfg,.ini,.dat" />
+        </div>
+      </div>
+
+      <div class="card mb-3 filters-card" style="margin: 30px;margin-top:0px;">
+        <div class="card-header filters-toggle" @click="filtersCollapsed = !filtersCollapsed">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Filters</span>
+            <span>{{ filtersCollapsed ? '▼' : '▲' }}</span>
+          </div>
+        </div>
+        <div class="collapse" :class="{ show: !filtersCollapsed }">
+          <div class="card-body">
+            <!-- Items Filters -->
+            <div v-if="activeTab === 'items' || activeTab === 'crafters'" class="row g-3 align-items-end">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Search (name/code)
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="filters.search = ''">Clear</button>
+              </label>
+              <input type="text" class="form-control" v-model.trim="filters.search" placeholder="Type to filter" />
+            </div>
+
+            <div class="col-6 col-md-3">
+              <label class="form-label">Rarity
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="filters.unique = 'all'">All</button>
+              </label>
+              <select class="form-select" v-model="filters.unique">
+                <option value="all">All</option>
+                <option value="unique">Unique</option>
+                <option value="set">Set</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <label class="form-label">Type
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="filters.isArmor = 'all'">All</button>
+              </label>
+              <select class="form-select" v-model="filters.isArmor">
+                <option value="all">All</option>
+                <option value="armor">Armor</option>
+                <option value="weapon">Weapon</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <label class="form-label">Might Corrupt
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="filters.mc = 'all'">All</button>
+              </label>
+              <select class="form-select" v-model="filters.mc">
+                <option value="all">All</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <label class="form-label">Level
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="filters.level = 'all'">All</button>
+              </label>
+              <select class="form-select" v-model="filters.level">
+                <option value="all">All</option>
+                <option value="Low">Low</option>
+                <option value="Mid">Mid</option>
+                <option value="God">God</option>
+              </select>
+            </div>
+
+            <div v-if="showCraftFilter" class="col-6 col-md-4">
+              <label class="form-label">Craft
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="filters.craft = 'all'">All</button>
+              </label>
+              <select class="form-select" v-model="filters.craft">
+                <option value="all">All</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Good corruptions
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="filters.tags = []">Clear</button>
+              </label>
+              <div class="d-flex flex-wrap gap-2">
+                <label v-for="tag in availableTags" :key="tag" class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" :value="tag" v-model="filters.tags">
+                  <span class="form-check-label">{{ tag }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+            <!-- Maps Filters -->
+            <div v-if="activeTab === 'maps'" class="row g-3 align-items-end">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Search (name/code)
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="mapFilters.search = ''">Clear</button>
+              </label>
+              <input type="text" class="form-control" v-model.trim="mapFilters.search" placeholder="Type to filter" />
+            </div>
+
+            <div class="col-6 col-md-3">
+              <label class="form-label">Tier
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="mapFilters.tier = 'all'">All</button>
+              </label>
+              <select class="form-select" v-model="mapFilters.tier">
+                <option value="all">All</option>
+                <option value="1">T1</option>
+                <option value="2">T2</option>
+                <option value="3">T3</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <label class="form-label">Level
+                <button type="button" class="btn btn-outline-primary btn-clear ms-2" @click="mapFilters.level = 'all'">All</button>
+              </label>
+              <select class="form-select" v-model="mapFilters.level">
+                <option value="all">All</option>
+                <option value="Low">Low</option>
+                <option value="Mid">Mid</option>
+                <option value="God">God</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="hideMapGroupRows" v-model="hideMapGroupRows">
+                <label class="form-check-label" for="hideMapGroupRows">
+                  Hide group rows (show all maps alphabetically)
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div style="padding: 0 30px; padding-top: 15px;">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" :class="{ active: activeTab === 'items' }" @click="activeTab = 'items'" id="items-tab" data-bs-toggle="tab" data-bs-target="#items-pane" type="button" role="tab" aria-controls="items-pane" :aria-selected="activeTab === 'items'">Items</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" :class="{ active: activeTab === 'maps' }" @click="activeTab = 'maps'" id="maps-tab" data-bs-toggle="tab" data-bs-target="#maps-pane" type="button" role="tab" aria-controls="maps-pane" :aria-selected="activeTab === 'maps'">Maps</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" :class="{ active: activeTab === 'crafters' }" @click="activeTab = 'crafters'" id="crafters-tab" data-bs-toggle="tab" data-bs-target="#crafters-pane" type="button" role="tab" aria-controls="crafters-pane" :aria-selected="activeTab === 'crafters'">Crafters</button>
+          </li>
+        </ul>
+      </div>
+      
+      
+      <table v-if="activeTab === 'items'" class="table table-striped table-hover table-sm align-middle" style="margin-bottom:0px;">
+        <thead>
+          <tr>
+            <th class="code-col" @click="setSort('code')">Code</th>
+            <th class="type-col" @click="setSort('isArmor')">Type</th>
+            <th class="rarity-col" @click="setSort('isUnique')">Rarity</th>
+            <th class="name-col" @click="setSort('name')">Name</th>
+            <th class="might-col" @click="setSort('mightCorrupt')">Might</th>
+            <th class="corrupt-col" @click="setSort('mcTags')">Corrupt</th>
+            <th class="level-col" @click="setSort('level')">Level</th>
+            <th v-if="showCraftColumn" class="craft-col" @click="setSort('craft')">Craft</th>
+          </tr>
+        </thead>
+      </table>
+      <table v-if="activeTab === 'maps'" class="table table-striped table-hover table-sm align-middle" style="margin-bottom:0px;">
+        <thead>
+          <tr>
+            <th class="code-col" @click="setSort('code')">Code</th>
+            <th class="tier-col" @click="setSort('tier')">Tier</th>
+            <th class="name-col" @click="setSort('name')">Name</th>
+            <th class="level-col" @click="setSort('level')">Level</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Items Tab -->
+      <div class="tab-pane fade show" :class="{ active: activeTab === 'items' }" id="items-pane" role="tabpanel" aria-labelledby="items-tab">
+        <table class="table table-striped table-hover table-sm align-middle main-table">
+          <thead>
+            <tr>
+              <th class="code-col" @click="setSort('code')">Code</th>
+              <th class="type-col" @click="setSort('isArmor')">Type</th>
+              <th class="rarity-col" @click="setSort('isUnique')">Rarity</th>
+              <th class="name-col" @click="setSort('name')">Name</th>
+              <th class="might-col" @click="setSort('mightCorrupt')">Might</th>
+              <th class="corrupt-col" @click="setSort('mcTags')">Corrupt</th>
+              <th class="level-col" @click="setSort('level')">Level</th>
+              <th v-if="showCraftColumn" class="craft-col" @click="setSort('craft')">Craft</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="(group, groupName) in groupedItems" :key="groupName">
+              <tr class="group-header-row">
+                <td colspan="7" class="group-header">{{ groupName }}</td>
+              </tr>
+              <tr v-for="item in group" :key="item.id">
+                <td class="code-cell code-col">{{ item.code }}</td>
+                <td class="code-cell type-col">{{ item.isArmor ? 'Armor' : 'Weapon' }}</td>
+                <td :class="item.isUnique ? 'name-unique' : 'name-set'">{{ item.isUnique ? 'Unique' : 'Set' }}</td>
+                <td :class="nameCellClass(item)" v-html="renderedName(item)"></td>
+                <td class="text-end might-col">
+                  <input type="checkbox" v-model="item.mightCorrupt" />
+                </td>
+                <td class="corrupt-col">
+                  <template v-if="item.mcTags && item.mcTags.length">
+                    <template v-for="(tag, idx) in item.mcTags">
+                      <span class="mc-tag">{{ tag }}</span><span class="mc-sep" v-if="idx < item.mcTags.length - 1"> | </span>
+                    </template>
+                  </template>
+                  <div v-if="item.mightCorrupt" class="dropdown d-inline ms-2" data-bs-auto-close="outside">
+                    <button class="corrupt-edit-toggle dropdown-toggle dropdown-toggle-no-caret" data-bs-toggle="dropdown" @click="startEditCorrupt(item)" title="Edit corruptions">
+                      <span aria-hidden="true">🩸</span>
+                      <span class="visually-hidden">Edit corruptions</span>
+                    </button>
+                    <div class="dropdown-menu p-3 noselect" style="min-width: 280px;" @click.stop>
+                      <div class="mb-2 fw-semibold">Select corruptions</div>
+                      <div class="d-flex flex-wrap gap-2">
+                        <label v-for="tag in availableTags" :key="tag" class="form-check form-check-inline">
+                          <input class="form-check-input" type="checkbox" :value="tag" v-model="tempMcTags[item.id]">
+                          <span class="form-check-label">{{ tag }}</span>
+                        </label>
+                      </div>
+                      <div class="mt-2 d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" @click="saveEditCorrupt(item, $event)">Save</button>
+                        <button class="btn btn-secondary btn-sm" @click="cancelEditCorrupt(item, $event)">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <select class="form-select form-select-sm" v-model="item.level">
+                    <option value="Low">Low</option>
+                    <option value="Mid">Mid</option>
+                    <option value="God">God</option>
+                  </select>
+                </td>
+                <td v-if="showCraftColumn" class="text-center craft-col">
+                  <input type="checkbox" v-model="item.craft" />
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Maps Tab -->
+      <div class="tab-pane fade" :class="{ active: activeTab === 'maps', show: activeTab === 'maps' }" id="maps-pane" role="tabpanel" aria-labelledby="maps-tab">
+        <table class="table table-striped table-hover table-sm align-middle main-table">
+          <thead>
+            <tr>
+              <th class="code-col">Code</th>
+              <th class="tier-col text-center">Tier</th>
+              <th class="name-col">Name</th>
+              <th class="level-col">Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Grouped view (with tier headers) -->
+            <template v-if="!hideMapGroupRows">
+              <template v-for="(group, groupName) in groupedMaps" :key="groupName">
+                <tr class="group-header-row">
+                  <td colspan="4" class="group-header">{{ groupName }}</td>
+                </tr>
+                <tr v-for="map in group" :key="map.id">
+                  <td class="code-col code-cell">{{ map.code }}</td>
+                  <td class="tier-col text-center" v-html="renderedMapTier(map)"></td>
+                  <td :class="mapNameCellClass(map)" v-html="renderedMapName(map)"></td>
+                  <td class="text-center level-col">
+                    <select class="form-select form-select-sm" v-model="map.level">
+                      <option value="Low">Low</option>
+                      <option value="Mid">Mid</option>
+                      <option value="God">God</option>
+                    </select>
+                  </td>
+                </tr>
+              </template>
+            </template>
+            <!-- Flat view (alphabetically) -->
+            <template v-else>
+              <tr v-for="map in filteredAndSortedMaps" :key="map.id">
+                <td class="code-col code-cell">{{ map.code }}</td>
+                <td class="tier-col text-center" v-html="renderedMapTier(map)"></td>
+                <td :class="mapNameCellClass(map)" v-html="renderedMapName(map)"></td>
+                <td class="text-center level-col">
+                  <select class="form-select form-select-sm" v-model="map.level">
+                    <option value="Low">Low</option>
+                    <option value="Mid">Mid</option>
+                    <option value="God">God</option>
+                  </select>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Crafters Tab -->
+      <div class="tab-pane fade" :class="{ active: activeTab === 'crafters', show: activeTab === 'crafters' }" id="crafters-pane" role="tabpanel" aria-labelledby="crafters-tab">
+        <table class="table table-striped table-hover table-sm align-middle main-table">
+          <thead>
+            <tr>
+              <th class="code-col" @click="setSort('code')">Code</th>
+              <th class="type-col" @click="setSort('isArmor')">Type</th>
+              <th class="rarity-col" @click="setSort('isUnique')">Rarity</th>
+              <th class="name-col" @click="setSort('name')">Name</th>
+              <th class="might-col" @click="setSort('mightCorrupt')">Might</th>
+              <th class="corrupt-col" @click="setSort('mcTags')">Corrupt</th>
+              <th class="level-col" @click="setSort('level')">Level</th>
+              <th v-if="showCraftColumn" class="craft-col" @click="setSort('craft')">Craft</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="(group, groupName) in groupedItems" :key="groupName">
+              <tr class="group-header-row">
+                <td colspan="7" class="group-header">{{ groupName }}</td>
+              </tr>
+              <tr v-for="item in group" :key="item.id">
+                <td class="code-cell code-col">{{ item.code }}</td>
+                <td class="code-cell type-col">{{ item.isArmor ? 'Armor' : 'Weapon' }}</td>
+                <td :class="item.isUnique ? 'name-unique' : 'name-set'">{{ item.isUnique ? 'Unique' : 'Set' }}</td>
+                <td :class="nameCellClass(item)" v-html="renderedName(item)"></td>
+                <td class="text-end might-col">
+                  <input type="checkbox" v-model="item.mightCorrupt" />
+                </td>
+                <td class="corrupt-col">
+                  <template v-if="item.mcTags && item.mcTags.length">
+                    <template v-for="(tag, idx) in item.mcTags">
+                      <span class="mc-tag">{{ tag }}</span><span class="mc-sep" v-if="idx < item.mcTags.length - 1"> | </span>
+                    </template>
+                  </template>
+                  <div v-if="item.mightCorrupt" class="dropdown d-inline ms-2" data-bs-auto-close="outside">
+                    <button class="corrupt-edit-toggle dropdown-toggle dropdown-toggle-no-caret" data-bs-toggle="dropdown" @click="startEditCorrupt(item)" title="Edit corruptions">
+                      <span aria-hidden="true">🩸</span>
+                      <span class="visually-hidden">Edit corruptions</span>
+                    </button>
+                    <div class="dropdown-menu p-3 noselect" style="min-width: 280px;" @click.stop>
+                      <div class="mb-2 fw-semibold">Select corruptions</div>
+                      <div class="d-flex flex-wrap gap-2">
+                        <label v-for="tag in availableTags" :key="tag" class="form-check form-check-inline">
+                          <input class="form-check-input" type="checkbox" :value="tag" v-model="tempMcTags[item.id]">
+                          <span class="form-check-label">{{ tag }}</span>
+                        </label>
+                      </div>
+                      <div class="mt-2 d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" @click="saveEditCorrupt(item, $event)">Save</button>
+                        <button class="btn btn-secondary btn-sm" @click="cancelEditCorrupt(item, $event)">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <select class="form-select form-select-sm" v-model="item.level">
+                    <option value="Low">Low</option>
+                    <option value="Mid">Mid</option>
+                    <option value="God">God</option>
+                  </select>
+                </td>
+                <td v-if="showCraftColumn" class="text-center craft-col">
+                  <input type="checkbox" v-model="item.craft" />
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    // Notification System
+    function showNotification(message, type = 'info') {
+      const container = document.getElementById('notification-container');
+      if (!container) return;
+      
+      const icons = {
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️',
+        success: '✓'
+      };
+      
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+        <span class="notification-icon">${icons[type] || icons.info}</span>
+        <span class="notification-message">${message}</span>
+      `;
+      
+      container.appendChild(notification);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+    
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          availableTags: ['CBF', 'IAS', 'DStrike', 'EDmg', 'FCR', 'FCR+SKDmg', 'FHR', 'SK', 'SOX', '3SOX', '6SOX', 'MF', 'LLeech', 'Pierce', 'RES', 'Random'],
+          defaultItems: [
+		
+//Normal Armor (Low)						
+	{ id: 2		, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Biggin's Bonnet"	, isUnique: true, isArmor: true , code: 'cap', craft: false, tier: 1},
+	{ id: 3		, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Infernal Cranium"	, isUnique: false, isArmor: true , code: 'cap', craft: false, tier: 1},
+	{ id: 4		, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sander's Paragon"	, isUnique: false, isArmor: true , code: 'cap', craft: false, tier: 1},
+	{ id: 5		, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Tarnhelm"	, isUnique: true, isArmor: true , code: 'skp', craft: false, tier: 1},
+	{ id: 6		, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Arcanna's Head"	, isUnique: false, isArmor: true , code: 'skp', craft: false, tier: 1},
+	{ id: 7		, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Coif of Glory"	, isUnique: true, isArmor: true , code: 'hlm', craft: false, tier: 1},
+	{ id: 8		, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Berserker's Headgear"	, isUnique: false, isArmor: true , code: 'hlm', craft: false, tier: 1},
+	{ id: 9		, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Duskdeep"	, isUnique: true, isArmor: true , code: 'fhl', craft: false, tier: 1},
+	{ id: 10	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Isenhart's Horns"	, isUnique: false, isArmor: true , code: 'fhl', craft: false, tier: 1},
+	{ id: 11	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Face of Horror"	, isUnique: true, isArmor: true , code: 'msk', craft: false, tier: 1},
+	{ id: 12	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Cathan's Visage"	, isUnique: false, isArmor: true , code: 'msk', craft: false, tier: 1},
+	{ id: 13	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Wormskull"	, isUnique: true, isArmor: true , code: 'bhm', craft: false, tier: 1},
+	{ id: 14	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Tancred's Skull"	, isUnique: false, isArmor: true , code: 'bhm', craft: false, tier: 1},
+	{ id: 15	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Howltusk"	, isUnique: true, isArmor: true , code: 'ghm', craft: false, tier: 1},
+	{ id: 16	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sigon's Visor"	, isUnique: false, isArmor: true , code: 'ghm', craft: false, tier: 1},
+	{ id: 17	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Undead Crown"	, isUnique: true, isArmor: true , code: 'crn', craft: false, tier: 1},
+	{ id: 18	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Iratha's Coil"	, isUnique: false, isArmor: true , code: 'crn', craft: false, tier: 1},
+	{ id: 19	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Milabrega's Diadem"	, isUnique: false, isArmor: true , code: 'crn', craft: false, tier: 1},
+	{ id: 20	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Naj's Circlet"	, isUnique: false, isArmor: true , code: 'ci0', craft: false, tier: 1},
+	{ id: 21	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Greyform"	, isUnique: true, isArmor: true , code: 'qui', craft: false, tier: 1},
+	{ id: 22	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Arctic Furs"	, isUnique: false, isArmor: true , code: 'qui', craft: false, tier: 1},
+	{ id: 23	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Blinkbat's Form"	, isUnique: true, isArmor: true , code: 'lea', craft: false, tier: 1},
+	{ id: 24	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Vidala's Ambush"	, isUnique: false, isArmor: true , code: 'lea', craft: false, tier: 1},
+	{ id: 25	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Centurion"	, isUnique: true, isArmor: true , code: 'hla', craft: false, tier: 1},
+	{ id: 26	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Twitchthroe"	, isUnique: true, isArmor: true , code: 'stu', craft: false, tier: 1},
+	{ id: 27	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Cow King's Hide"	, isUnique: false, isArmor: true , code: 'stu', craft: false, tier: 1},
+	{ id: 28	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Darkglow"	, isUnique: true, isArmor: true , code: 'rng', craft: false, tier: 1},
+	{ id: 29	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Angelic Mantle"	, isUnique: false, isArmor: true , code: 'rng', craft: false, tier: 1},
+	{ id: 30	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hawkmail"	, isUnique: true, isArmor: true , code: 'scl', craft: false, tier: 1},
+	{ id: 32	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sparking Mail"	, isUnique: true, isArmor: true , code: 'chn', craft: false, tier: 1},
+	{ id: 33	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Cathan's Mesh"	, isUnique: false, isArmor: true , code: 'chn', craft: false, tier: 1},
+	{ id: 34	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Venom Ward"	, isUnique: true, isArmor: true , code: 'brs', craft: false, tier: 1},
+	{ id: 35	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Isenhart's Case"	, isUnique: false, isArmor: true , code: 'brs', craft: false, tier: 1},
+	{ id: 36	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Iceblink"	, isUnique: true, isArmor: true , code: 'spl', craft: false, tier: 1},
+	{ id: 37	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Berserker's Hauberk"	, isUnique: false, isArmor: true , code: 'spl', craft: false, tier: 1},
+	{ id: 38	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Boneflesh"	, isUnique: true, isArmor: true , code: 'plt', craft: false, tier: 1},
+	{ id: 39	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Rockfleece"	, isUnique: true, isArmor: true , code: 'fld', craft: false, tier: 1},
+	{ id: 41	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Rattlecage"	, isUnique: true, isArmor: true , code: 'gth', craft: false, tier: 1},
+	{ id: 42	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sigon's Shelter"	, isUnique: false, isArmor: true , code: 'gth', craft: false, tier: 1},
+	{ id: 43	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Heavenly Garb"	, isUnique: true, isArmor: true , code: 'ltp', craft: false, tier: 1},
+	{ id: 44	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Arcanna's Flesh"	, isUnique: false, isArmor: true , code: 'ltp', craft: false, tier: 1},
+	{ id: 45	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Goldskin"	, isUnique: true, isArmor: true , code: 'ful', craft: false, tier: 1},
+	{ id: 46	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Tancred's Spine"	, isUnique: false, isArmor: true , code: 'ful', craft: false, tier: 1},
+	{ id: 47	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Silks of the Victor"	, isUnique: true, isArmor: true , code: 'aar', craft: false, tier: 1},
+	{ id: 48	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Milabrega's Robe"	, isUnique: false, isArmor: true , code: 'aar', craft: false, tier: 1},
+	{ id: 49	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Pelta Lunata"	, isUnique: true, isArmor: true , code: 'buc', craft: false, tier: 1},
+	{ id: 50	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hsarus' Iron Fist"	, isUnique: false, isArmor: true , code: 'buc', craft: false, tier: 1},
+	{ id: 51	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Umbral Disk"	, isUnique: true, isArmor: true , code: 'sml', craft: false, tier: 1},
+	{ id: 52	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Cleglaw's Claw"	, isUnique: false, isArmor: true , code: 'sml', craft: false, tier: 1},
+	{ id: 53	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Stormguild"	, isUnique: true, isArmor: true , code: 'lrg', craft: false, tier: 1},
+	{ id: 54	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Civerb's Ward"	, isUnique: false, isArmor: true , code: 'lrg', craft: false, tier: 1},
+	{ id: 55	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Swordback Hold"	, isUnique: true, isArmor: true , code: 'spk', craft: false, tier: 1},
+	{ id: 56	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Steelclash"	, isUnique: true, isArmor: true , code: 'kit', craft: false, tier: 1},
+	{ id: 57	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Milabrega's Orb"	, isUnique: false, isArmor: true , code: 'kit', craft: false, tier: 1},
+	{ id: 58	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Wall of the Eyeless"	, isUnique: true, isArmor: true , code: 'bsh', craft: false, tier: 1},
+	{ id: 59	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bverrit Keep"	, isUnique: true, isArmor: true , code: 'tow', craft: false, tier: 1},
+	{ id: 60	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sigon's Guard"	, isUnique: false, isArmor: true , code: 'tow', craft: false, tier: 1},
+	{ id: 61	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Ward"	, isUnique: true, isArmor: true , code: 'gts', craft: false, tier: 1},
+	{ id: 62	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Isenhart's Parry"	, isUnique: false, isArmor: true , code: 'gts', craft: false, tier: 1},
+	{ id: 63	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Hand of Broc"	, isUnique: true, isArmor: true , code: 'lgl', craft: false, tier: 1},
+	{ id: 64	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Death's Hand"	, isUnique: false, isArmor: true , code: 'lgl', craft: false, tier: 1},
+	{ id: 65	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bloodfist"	, isUnique: true, isArmor: true , code: 'vgl', craft: false, tier: 1},
+	{ id: 66	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sander's Taboo"	, isUnique: false, isArmor: true , code: 'vgl', craft: false, tier: 1},
+	{ id: 67	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Chance Guards"	, isUnique: true, isArmor: true , code: 'mgl', craft: false, tier: 1},
+	{ id: 68	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Cleglaw's Pincers"	, isUnique: false, isArmor: true , code: 'mgl', craft: false, tier: 1},
+	{ id: 69	, level: 'Low'	, mightCorrupt: true	, mcTags: ['FCR']	, name: "Magefist"	, isUnique: true, isArmor: true , code: 'tgl', craft: false, tier: 1},
+	{ id: 70	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Arctic Mitts"	, isUnique: false, isArmor: true , code: 'tgl', craft: false, tier: 1},
+	{ id: 71	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Iratha's Cuff"	, isUnique: false, isArmor: true , code: 'tgl', craft: false, tier: 1},
+	{ id: 72	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Frostburn"	, isUnique: true, isArmor: true , code: 'hgl', craft: false, tier: 1},
+	{ id: 73	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sigon's Gage"	, isUnique: false, isArmor: true , code: 'hgl', craft: false, tier: 1},
+	{ id: 74	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hotspur"	, isUnique: true, isArmor: true , code: 'lbt', craft: false, tier: 1},
+	{ id: 75	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Tancred's Hobnails"	, isUnique: false, isArmor: true , code: 'lbt', craft: false, tier: 1},
+	{ id: 76	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Gorefoot"	, isUnique: true, isArmor: true , code: 'vbt', craft: false, tier: 1},
+	{ id: 77	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Cow King's Hooves"	, isUnique: false, isArmor: true , code: 'vbt', craft: false, tier: 1},
+	{ id: 78	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sander's Riprap"	, isUnique: false, isArmor: true , code: 'vbt', craft: false, tier: 1},
+	{ id: 79	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Treads of Cthon"	, isUnique: true, isArmor: true , code: 'mbt', craft: false, tier: 1},
+	{ id: 80	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hsarus' Iron Heel"	, isUnique: false, isArmor: true , code: 'mbt', craft: false, tier: 1},
+	{ id: 81	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Goblin Toe"	, isUnique: true, isArmor: true , code: 'tbt', craft: false, tier: 1},
+	{ id: 82	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Vidala's Fetlock"	, isUnique: false, isArmor: true , code: 'tbt', craft: false, tier: 1},
+	{ id: 83	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Tearhaunch"	, isUnique: true, isArmor: true , code: 'hbt', craft: false, tier: 1},
+	{ id: 84	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sigon's Sabot"	, isUnique: false, isArmor: true , code: 'hbt', craft: false, tier: 1},
+	{ id: 85	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Lenymo"	, isUnique: true, isArmor: true , code: 'lbl', craft: false, tier: 1},
+	{ id: 86	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Death's Guard"	, isUnique: false, isArmor: true , code: 'lbl', craft: false, tier: 1},
+	{ id: 87	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Snakecord"	, isUnique: true, isArmor: true , code: 'vbl', craft: false, tier: 1},
+	{ id: 88	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Arctic Binding"	, isUnique: false, isArmor: true , code: 'vbl', craft: false, tier: 1},
+	{ id: 89	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Nightsmoke"	, isUnique: true, isArmor: true , code: 'mbl', craft: false, tier: 1},
+	{ id: 90	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hsarus' Iron Stay"	, isUnique: false, isArmor: true , code: 'mbl', craft: false, tier: 1},
+	{ id: 91	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hwanin's Blessing"	, isUnique: false, isArmor: true , code: 'mbl', craft: false, tier: 1},
+	{ id: 92	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Goldwrap"	, isUnique: true, isArmor: true , code: 'tbl', craft: false, tier: 1},
+	{ id: 93	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Infernal Sign"	, isUnique: false, isArmor: true , code: 'tbl', craft: false, tier: 1},
+	{ id: 94	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Iratha's Cord"	, isUnique: false, isArmor: true , code: 'tbl', craft: false, tier: 1},
+	{ id: 95	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bladebuckle"	, isUnique: true, isArmor: true , code: 'hbl', craft: false, tier: 1},
+	{ id: 96	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sigon's Wrap"	, isUnique: false, isArmor: true , code: 'hbl', craft: false, tier: 1},
+	{ id: 97	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Quetzalcoatl (new)"	, isUnique: true, isArmor: true , code: 'dr2', craft: false, tier: 1},
+	{ id: 98	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Immortal King's Will"	, isUnique: false, isArmor: true , code: 'ba5', craft: false, tier: 1},
+	{ id: 99	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sankekur's Fall (new)"	, isUnique: true, isArmor: true , code: 'pa3', craft: false, tier: 1},
+	{ id: 102	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Peasant Crown"	, isUnique: true, isArmor: true , code: 'xap', craft: false, tier: 2},
+	{ id: 103	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Cow King's Horns"	, isUnique: false, isArmor: true , code: 'xap', craft: false, tier: 2},
+	{ id: 104	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Rockstopper"	, isUnique: true, isArmor: true , code: 'xkp', craft: false, tier: 2},
+	{ id: 106	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Stealskull"	, isUnique: true, isArmor: true , code: 'xlm', craft: false, tier: 2},
+	{ id: 108	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Darksight Helm"	, isUnique: true, isArmor: true , code: 'xhl', craft: false, tier: 2},
+	{ id: 109	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sazabi's Mental Sheath"	, isUnique: false, isArmor: true , code: 'xhl', craft: false, tier: 2},
+	{ id: 110	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Blackhorn's Face"	, isUnique: true, isArmor: true , code: 'xsk', craft: false, tier: 2},
+	{ id: 111	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Tal Rasha's Horadric Crest"	, isUnique: false, isArmor: true , code: 'xsk', craft: false, tier: 2},
+	{ id: 112	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['CBF','SK','3SOX']	, name: "Vampire Gaze"	, isUnique: true, isArmor: true , code: 'xh9', craft: false, tier: 2},
+	{ id: 113	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['CBF','3SOX']	, name: "Natalya's Totem"	, isUnique: false, isArmor: true , code: 'xh9', craft: false, tier: 2},
+  { id: 114	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['3SOX']	, name: "Valkyrie Wing"	, isUnique: true, isArmor: true , code: 'xhm', craft: false, tier: 2},
+  { id: 115	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Guillaume's Face"	, isUnique: false, isArmor: true , code: 'xhm', craft: false, tier: 2},
+	{ id: 116	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['CBF','3SOX']	, name: "Crown of Thieves"	, isUnique: true, isArmor: true , code: 'xrn', craft: false, tier: 2},
+	{ id: 117	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hwanin's Splendor"	, isUnique: false, isArmor: true , code: 'xrn', craft: false, tier: 2},
+  { id: 118	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['SOX']	, name: "Kira's Guardian"	, isUnique: true, isArmor: true , code: 'ci2', craft: false, tier: 2},
+	{ id: 120	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Spirit Shroud"	, isUnique: true, isArmor: true , code: 'xui', craft: false, tier: 2},
+  { id: 122	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['FCR']	, name: "Skin of the Vipermagi"	, isUnique: true, isArmor: true , code: 'xea', craft: false, tier: 2},
+	{ id: 124	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Skin of the Flayed One"	, isUnique: true, isArmor: true , code: 'xla', craft: false, tier: 2},
+	{ id: 125	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Iron Pelt"	, isUnique: true, isArmor: true , code: 'xtu', craft: false, tier: 2},
+	{ id: 127	, level: 'Low'	, mightCorrupt: true	, mcTags: ['Random']	, name: "Spirit Forge"	, isUnique: true, isArmor: true , code: 'xng', craft: false, tier: 2},
+	{ id: 129	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['3SOX']	, name: "Crow Caw"	, isUnique: true, isArmor: true , code: 'xcl', craft: false, tier: 2},
+	{ id: 130	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hwanin's Refuge"	, isUnique: false, isArmor: true , code: 'xcl', craft: false, tier: 2},
+  { id: 131	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['CBF','SK','SOX']	, name: "Shaftstop"	, isUnique: true, isArmor: true , code: 'xhn', craft: false, tier: 2},
+	{ id: 133	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Duriel's Shell"	, isUnique: true, isArmor: true , code: 'xrs', craft: false, tier: 2},
+	{ id: 134	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Haemosu's Adamant"	, isUnique: false, isArmor: true , code: 'xrs', craft: false, tier: 2},
+	{ id: 135	, level: 'Low'	, mightCorrupt: true	, mcTags: ['3SOX']	, name: "Skullder's Ire"	, isUnique: true, isArmor: true , code: 'xpl', craft: false, tier: 2},
+  { id: 137	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['SK','3SOX']	, name: "Guardian Angel"	, isUnique: true, isArmor: true , code: 'xlt', craft: false, tier: 2},
+	{ id: 138	, level: 'Low'	, mightCorrupt: true	, mcTags: ['3SOX']	, name: "Toothrow"	, isUnique: true, isArmor: true , code: 'xld', craft: false, tier: 2},
+  { id: 140	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['SK']	, name: "Atma's Wail"	, isUnique: true, isArmor: true , code: 'xth', craft: false, tier: 2},
+  { id: 142	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Que-Hegan's Wisdom"	, isUnique: true, isArmor: true , code: 'xtp', craft: false, tier: 2},  //xxxxxxxxxx
+	{ id: 144	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Black Hades"	, isUnique: true, isArmor: true , code: 'xul', craft: false, tier: 2},
+	{ id: 145	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Trang-Oul's Scales"	, isUnique: false, isArmor: true , code: 'xul', craft: false, tier: 2},
+	{ id: 146	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Corpsemourn"	, isUnique: true, isArmor: true , code: 'xar', craft: false, tier: 2},
+	{ id: 147	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['DStrike','LLeech','Pierce']	, name: "Griswold's Heart"	, isUnique: false, isArmor: true , code: 'xar', craft: false, tier: 2},
+	{ id: 148	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Visceratuant"	, isUnique: true, isArmor: true , code: 'xuc', craft: false, tier: 2},
+	{ id: 150	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Moser's Blessed Circle"	, isUnique: true, isArmor: true , code: 'xml', craft: false, tier: 2},
+	{ id: 151	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Whitstan's Guard"	, isUnique: false, isArmor: true , code: 'xml', craft: false, tier: 2},
+	{ id: 152	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Stormchaser"	, isUnique: true, isArmor: true , code: 'xrg', craft: false, tier: 2},
+	{ id: 154	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Lance Guard"	, isUnique: true, isArmor: true , code: 'xpk', craft: false, tier: 2},
+	{ id: 155	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['Random']	, name: "Tiamat's Rebuke"	, isUnique: true, isArmor: true , code: 'xit', craft: false, tier: 2},
+  { id: 157	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['SK','FCR','SOX']	, name: "Lidless Wall"	, isUnique: true, isArmor: true , code: 'xsh', craft: false, tier: 2},
+	{ id: 158	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Gerke's Sanctuary"	, isUnique: true, isArmor: true , code: 'xow', craft: false, tier: 2},
+  { id: 160	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Radament's Sphere"	, isUnique: true, isArmor: true , code: 'xts', craft: false, tier: 2},
+	{ id: 162	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Venom Grip"	, isUnique: true, isArmor: true , code: 'xlg', craft: false, tier: 2},
+	{ id: 164	, level: 'God'	, mightCorrupt: true	, mcTags: ['IAS']	, name: "Gravepalm"	, isUnique: true, isArmor: true , code: 'xvg', craft: false, tier: 2},
+	{ id: 165	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Magnus' Skin"	, isUnique: false, isArmor: true , code: 'xvg', craft: false, tier: 2},
+	{ id: 166	, level: 'Low'	, mightCorrupt: false	, mcTags: ['IAS']	, name: "Ghoulhide"	, isUnique: true, isArmor: true , code: 'xmg', craft: false, tier: 2},
+	{ id: 167	, level: 'God'	, mightCorrupt: true	, mcTags: ['FCR','MLeech','Pierce','DStrike']	, name: "Trang-Oul's Claws"	, isUnique: false, isArmor: true , code: 'xmg', craft: false, tier: 2},
+  { id: 168	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Lava Gout"	, isUnique: true, isArmor: true , code: 'xtg', craft: false, tier: 2},
+  { id: 169	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "M'avina's Icy Clutch"	, isUnique: false, isArmor: true , code: 'xtg', craft: false, tier: 2},
+  { id: 170	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Hellmouth"	, isUnique: true, isArmor: true , code: 'xhg', craft: false, tier: 2},
+  { id: 171	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Immortal King's Forge"	, isUnique: false, isArmor: true , code: 'xhg', craft: false, tier: 2},
+  { id: 172	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Infernostride"	, isUnique: true, isArmor: true , code: 'xlb', craft: false, tier: 2},
+  { id: 173	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Rite of Passage"	, isUnique: false, isArmor: true , code: 'xlb', craft: false, tier: 2},
+  { id: 174	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Waterwalk"	, isUnique: true, isArmor: true , code: 'xvb', craft: false, tier: 2},
+  { id: 177	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Silkweave"	, isUnique: true, isArmor: true , code: 'xmb', craft: false, tier: 2},
+  { id: 178	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Natalya's Soul"	, isUnique: false, isArmor: true , code: 'xmb', craft: false, tier: 2},
+  { id: 179	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "War Traveler"	, isUnique: true, isArmor: true , code: 'xtb', craft: false, tier: 2},
+  { id: 180	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Aldur's Advance"	, isUnique: false, isArmor: true , code: 'xtb', craft: false, tier: 2},
+  { id: 181	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Gore Rider"	, isUnique: true, isArmor: true , code: 'xhb', craft: false, tier: 2},
+  { id: 182	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Immortal King's Pillar"	, isUnique: false, isArmor: true , code: 'xhb', craft: false, tier: 2},
+	{ id: 183	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "String of Ears"	, isUnique: true, isArmor: true , code: 'zlb', craft: false, tier: 2},
+  { id: 185	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Razortail"	, isUnique: true, isArmor: true , code: 'zvb', craft: false, tier: 2},
+  { id: 186	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "M'avina's Tenet"	, isUnique: false, isArmor: true , code: 'zvb', craft: false, tier: 2},
+	{ id: 187	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Gloom's Trap"	, isUnique: true, isArmor: true , code: 'zmb', craft: false, tier: 2},
+	{ id: 188	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Tal Rasha's Fine-Spun Cloth"	, isUnique: false, isArmor: true , code: 'zmb', craft: false, tier: 2},
+  { id: 189	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['FCR','FHR','RES']	, name: "Snowclash"	, isUnique: true, isArmor: true , code: 'ztb', craft: false, tier: 2},
+	{ id: 190	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Wilhelm's Pride"	, isUnique: false, isArmor: true , code: 'ztb', craft: false, tier: 2},
+  { id: 191	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Thundergod's Vigor"	, isUnique: true, isArmor: true , code: 'zhb', craft: false, tier: 2},
+  { id: 192	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Immortal King's Detail"	, isUnique: false, isArmor: true , code: 'zhb', craft: false, tier: 2},
+	{ id: 193	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Fenris (new)"	, isUnique: true, isArmor: true , code: 'dr6', craft: false, tier: 2},
+	{ id: 194	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Aldur's Stony Gaze"	, isUnique: false, isArmor: true , code: 'dr8', craft: false, tier: 2},
+	{ id: 195	, level: 'Low'	, mightCorrupt: false	, mcTags: ['CBF']	, name: "Jalal's Mane"	, isUnique: true, isArmor: true , code: 'dra', craft: false, tier: 2},
+  { id: 197	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Cyclopean Roar (new)"	, isUnique: true, isArmor: true , code: 'ba6', craft: false, tier: 2},
+  { id: 198	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['3SOX']	, name: "Wildspeaker (new)"	, isUnique: true, isArmor: true , code: 'ba7', craft: false, tier: 2},
+  { id: 199	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Arreat's Face"	, isUnique: true, isArmor: true , code: 'baa', craft: false, tier: 2},
+  { id: 200	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Herald of Zakarum"	, isUnique: true, isArmor: true , code: 'pa9', craft: false, tier: 2},
+  { id: 201	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Kalan's Legacy (new)"	, isUnique: true, isArmor: true , code: 'ne6', craft: false, tier: 2},
+	{ id: 202	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Trang-Oul's Wing"	, isUnique: false, isArmor: true , code: 'ne9', craft: false, tier: 2},
+  { id: 203	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Homunculus"	, isUnique: true, isArmor: true , code: 'nea', craft: false, tier: 2},
+	{ id: 206	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Harlequin Crest"	, isUnique: true, isArmor: true , code: 'uap', craft: false, tier: 3},
+	{ id: 211	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Steel Shade"	, isUnique: true, isArmor: true , code: 'ulm', craft: false, tier: 3},
+	{ id: 213	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Overlord's Helm (new)"	, isUnique: true, isArmor: true , code: 'uhl', craft: false, tier: 3},
+	{ id: 215	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Andariel's Visage"	, isUnique: true, isArmor: true , code: 'usk', craft: false, tier: 3},
+	{ id: 217	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Giant Skull"	, isUnique: true, isArmor: true , code: 'uh9', craft: false, tier: 3},
+	{ id: 218	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['CBF','3SOX']	, name: "Trang-Oul's Guise"	, isUnique: false, isArmor: true , code: 'uh9', craft: false, tier: 3},
+	{ id: 219	, level: 'God'	, mightCorrupt: true	, mcTags: ['CBF','SK','SOX']	, name: "Veil of Steel"	, isUnique: true, isArmor: true , code: 'uhm', craft: false, tier: 3},
+	{ id: 220	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Nightwing's Veil"	, isUnique: true, isArmor: true , code: 'uhm', craft: false, tier: 3},
+	{ id: 221	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ondal's Almighty"	, isUnique: false, isArmor: true , code: 'uhm', craft: false, tier: 3},
+	{ id: 222	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Crown of Ages"	, isUnique: true, isArmor: true , code: 'urn', craft: false, tier: 3},
+	{ id: 223	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Griswold's Valor"	, isUnique: false, isArmor: true , code: 'urn', craft: false, tier: 3},
+	{ id: 226	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Griffon's Eye"	, isUnique: true, isArmor: true , code: 'ci3', craft: false, tier: 3},
+	{ id: 227	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['3SOX']	, name: "M'avina's True Sight"	, isUnique: false, isArmor: true , code: 'ci3', craft: false, tier: 3},
+	{ id: 229	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ormus' Robes"	, isUnique: true, isArmor: true , code: 'uui', craft: false, tier: 3},
+	{ id: 230	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Dark Adherent"	, isUnique: false, isArmor: true , code: 'uui', craft: false, tier: 3},
+	{ id: 234	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Gladiator's Bane"	, isUnique: true, isArmor: true , code: 'utu', craft: false, tier: 3},
+	{ id: 236	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Wraithskin (new)"	, isUnique: true, isArmor: true , code: 'ung', craft: false, tier: 3},
+	{ id: 238	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Natalya's Shadow"	, isUnique: false, isArmor: true , code: 'ucl', craft: false, tier: 3},
+	{ id: 240	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Cage of the Unsullied (new)"	, isUnique: true, isArmor: true , code: 'rar', craft: false, tier: 3},
+	{ id: 244	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Arkaine's Valor"	, isUnique: true, isArmor: true , code: 'upl', craft: false, tier: 3},
+	{ id: 245	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sazabi's Ghost Liberator"	, isUnique: false, isArmor: true , code: 'upl', craft: false, tier: 3},
+	{ id: 246	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Naj's Light Plate"	, isUnique: false, isArmor: true , code: 'ult', craft: false, tier: 3},
+	{ id: 247	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Leviathan"	, isUnique: true, isArmor: true , code: 'uld', craft: false, tier: 3},
+	{ id: 248	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "M'avina's Embrace"	, isUnique: false, isArmor: true , code: 'uld', craft: false, tier: 3},
+	{ id: 249	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Dark Abyss (new)"	, isUnique: true, isArmor: true , code: 'uth', craft: false, tier: 3},
+	{ id: 250	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Tal Rasha's Guardianship"	, isUnique: false, isArmor: true , code: 'uth', craft: false, tier: 3},
+	{ id: 251	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Purgatory (new)"	, isUnique: true, isArmor: true , code: 'utp', craft: false, tier: 3},
+	{ id: 253	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Steel Carapace"	, isUnique: true, isArmor: true , code: 'uul', craft: false, tier: 3},
+	{ id: 254	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Aldur's Deception"	, isUnique: false, isArmor: true , code: 'uul', craft: false, tier: 3},
+	{ id: 255	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Templar's Might"	, isUnique: true, isArmor: true , code: 'uar', craft: false, tier: 3},
+	{ id: 256	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Tyrael's Might"	, isUnique: true, isArmor: true , code: 'uar', craft: false, tier: 3},
+	{ id: 257	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Immortal King's Soul Cage"	, isUnique: false, isArmor: true , code: 'uar', craft: false, tier: 3},
+	{ id: 261	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Blackoak Shield"	, isUnique: true, isArmor: true , code: 'uml', craft: false, tier: 3},
+	{ id: 263	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Twilight's Reflection (new)"	, isUnique: true, isArmor: true , code: 'urg', craft: false, tier: 3},
+	{ id: 265	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Spike Thorn"	, isUnique: true, isArmor: true , code: 'upk', craft: false, tier: 3},
+	{ id: 266	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Stormshield"	, isUnique: true, isArmor: true , code: 'uit', craft: false, tier: 3},
+	{ id: 268	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Head Hunter's Glory"	, isUnique: true, isArmor: true , code: 'ush', craft: false, tier: 3},
+	{ id: 269	, level: 'God'	, mightCorrupt: true	, mcTags: ['FCR']	, name: "Medusa's Gaze"	, isUnique: true, isArmor: true , code: 'uow', craft: false, tier: 3},
+	{ id: 271	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Spirit Ward"	, isUnique: true, isArmor: true , code: 'uts', craft: false, tier: 3},
+	{ id: 272	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Taebaek's Glory"	, isUnique: false, isArmor: true , code: 'uts', craft: false, tier: 3},
+	{ id: 274	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Titan's Grip (new)"	, isUnique: true, isArmor: true , code: 'ulg', craft: false, tier: 3},
+	{ id: 275	, level: 'God'	, mightCorrupt: true	, mcTags: ['EDmg']	, name: "Laying of Hands"	, isUnique: false, isArmor: true , code: 'ulg', craft: false, tier: 3},
+	{ id: 276	, level: 'God'	, mightCorrupt: true	, mcTags: ['Edmg','IAS']	, name: "Dracul's Grasp"	, isUnique: true, isArmor: true , code: 'uvg', craft: false, tier: 3},
+	{ id: 278	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Soul Drainer"	, isUnique: true, isArmor: true , code: 'umg', craft: false, tier: 3},
+	{ id: 280	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Occultist (new)"	, isUnique: true, isArmor: true , code: 'utg', craft: false, tier: 3},
+	{ id: 283	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Steelrend"	, isUnique: true, isArmor: true , code: 'uhg', craft: false, tier: 3},
+	{ id: 286	, level: 'Low'	, mightCorrupt: true	, mcTags: ['Random']	, name: "Merman's Sprocket (new)"	, isUnique: true, isArmor: true , code: 'ulb', craft: false, tier: 3},
+	{ id: 288	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Sandstorm Trek"	, isUnique: true, isArmor: true , code: 'uvb', craft: false, tier: 3},
+	{ id: 291	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Marrowwalk"	, isUnique: true, isArmor: true , code: 'umb', craft: false, tier: 3},
+	{ id: 293	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ithereal's Path (new)"	, isUnique: true, isArmor: true , code: 'utb', craft: false, tier: 3},
+	{ id: 295	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Shadow Dancer"	, isUnique: true, isArmor: true , code: 'uhb', craft: false, tier: 3},
+	{ id: 298	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Arachnid Mesh"	, isUnique: true, isArmor: true , code: 'ulc', craft: false, tier: 3},
+	{ id: 300	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Nosferatu's Coil"	, isUnique: true, isArmor: true , code: 'uvc', craft: false, tier: 3},
+	{ id: 302	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['FCR','Pierce','Random']	, name: "Verdungo's Hearty Cord"	, isUnique: true, isArmor: true , code: 'umc', craft: false, tier: 3},
+	{ id: 303	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Credendum"	, isUnique: false, isArmor: true , code: 'umc', craft: false, tier: 3},
+	{ id: 305	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Band of Skulls (new)"	, isUnique: true, isArmor: true , code: 'rbe', craft: false, tier: 3},
+	{ id: 307	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Trang-Oul's Girth"	, isUnique: false, isArmor: true , code: 'rbe', craft: false, tier: 3},
+	{ id: 308	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Siggard's Staunch (new)"	, isUnique: true, isArmor: true , code: 'uhc', craft: false, tier: 3},
+	{ id: 311	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Cerebus' Bite"	, isUnique: true, isArmor: true , code: 'drb', craft: false, tier: 3},
+	{ id: 312	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Denmother (new)"	, isUnique: true, isArmor: true , code: 'drc', craft: false, tier: 3},
+	{ id: 313	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Spirit Keeper"	, isUnique: true, isArmor: true , code: 'drd', craft: false, tier: 3},
+	{ id: 314	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ravenlore"	, isUnique: true, isArmor: true , code: 'dre', craft: false, tier: 3},
+	{ id: 315	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ursa's Nightmare (new)"	, isUnique: true, isArmor: true , code: 'drf', craft: false, tier: 3},
+	{ id: 318	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Wolfhowl"	, isUnique: true, isArmor: true , code: 'bac', craft: false, tier: 3},
+	{ id: 319	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Demonhorn's Edge"	, isUnique: true, isArmor: true , code: 'bad', craft: false, tier: 3},
+	{ id: 320	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Halaberd's Reign"	, isUnique: true, isArmor: true , code: 'bae', craft: false, tier: 3},
+	{ id: 321	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Raekor's Virtue (new)"	, isUnique: true, isArmor: true , code: 'baf', craft: false, tier: 3},
+	{ id: 324	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Alma Negra"	, isUnique: true, isArmor: true , code: 'pac', craft: false, tier: 3},
+	{ id: 326	, level: 'Mis'	, mightCorrupt: true	, mcTags: ['3SOX']	, name: "Dragonscale"	, isUnique: true, isArmor: true , code: 'pae', craft: false, tier: 3},
+	{ id: 327	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Skywarden (new)"	, isUnique: true, isArmor: true , code: 'paf', craft: false, tier: 3},
+	{ id: 328	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Griswold's Honor"	, isUnique: false, isArmor: true , code: 'paf', craft: false, tier: 3},
+	{ id: 331	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Sacred Totem (new)"	, isUnique: true, isArmor: true , code: 'neg', craft: false, tier: 3},
+	{ id: 332	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Martyrdom (new)"	, isUnique: true, isArmor: true , code: 'ned', craft: false, tier: 3},
+	{ id: 333	, level: 'God'	, mightCorrupt: true	, mcTags: ['CBF','FCR','SOX']	, name: "Boneflame"	, isUnique: true, isArmor: true , code: 'nee', craft: false, tier: 3},
+	{ id: 334	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Darkforce Spawn"	, isUnique: true, isArmor: true , code: 'nef', craft: false, tier: 3},
+  { id: 335 , level: 'Low'  , mightCorrupt: false , mcTags: []  , name: "Blunt Arrows (new)", isUnique: true, isArmor: true , code: 'aqv', craft: false, tier: 1},
+  { id: 336 , level: 'Mid'  , mightCorrupt: false , mcTags: []  , name: "Sharp Arrows (new)", isUnique: true, isArmor: true , code: 'aqv2', craft: false, tier: 2},
+  { id: 337 , level: 'God'  , mightCorrupt: false , mcTags: []  , name: "Razor Arrows (new)", isUnique: true, isArmor: true , code: 'aqv3', craft: false, tier: 3},
+  { id: 335 , level: 'Low'  , mightCorrupt: false , mcTags: []  , name: "Light Bolts (new)", isUnique: true, isArmor: true , code: 'cqv', craft: false, tier: 1},
+  { id: 336 , level: 'Mid'  , mightCorrupt: false , mcTags: []  , name: "Heavy Bolts (new)", isUnique: true, isArmor: true , code: 'cqv2', craft: false, tier: 2},
+  { id: 337 , level: 'God'  , mightCorrupt: false , mcTags: []  , name: "War Bolts (new)", isUnique: true, isArmor: true , code: 'cqv3', craft: false, tier: 3},
+  						
+						
+						
+
+//Normal Weapon (Low)						
+	{ id: 502	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Gnasher"	, isUnique: true, isArmor: false ,code: 'hax', craft: false, tier: 1},
+	{ id: 503	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Deathspade"	, isUnique: true, isArmor: false ,code: 'axe', craft: false, tier: 1},
+	{ id: 504	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bladebone"	, isUnique: true, isArmor: false ,code: '2ax', craft: false, tier: 1},
+	{ id: 505	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Berserker's Hatchet"	, isUnique: false, isArmor: false ,code: '2ax', craft: false, tier: 1},
+	{ id: 506	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Skull Splitter"	, isUnique: true, isArmor: false ,code: 'mpi', craft: false, tier: 1},
+	{ id: 507	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Tancred's Crowbill"	, isUnique: false, isArmor: false ,code: 'mpi', craft: false, tier: 1},
+	{ id: 508	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Rakescar"	, isUnique: true, isArmor: false ,code: 'wax', craft: false, tier: 1},
+	{ id: 509	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Axe of Fechmar"	, isUnique: true, isArmor: false ,code: 'lax', craft: false, tier: 1},
+	{ id: 510	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Goreshovel"	, isUnique: true, isArmor: false ,code: 'bax', craft: false, tier: 1},
+	{ id: 511	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Chieftain"	, isUnique: true, isArmor: false ,code: 'btx', craft: false, tier: 1},
+	{ id: 512	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Brainhew"	, isUnique: true, isArmor: false ,code: 'gax', craft: false, tier: 1},
+	{ id: 513	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Humongous"	, isUnique: true, isArmor: false ,code: 'gix', craft: false, tier: 1},
+	{ id: 515	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Felloak"	, isUnique: true, isArmor: false ,code: 'clb', craft: false, tier: 1},
+	{ id: 516	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Stoutnail"	, isUnique: true, isArmor: false ,code: 'spc', craft: false, tier: 1},
+	{ id: 517	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Crushflange"	, isUnique: true, isArmor: false ,code: 'mac', craft: false, tier: 1},
+	{ id: 518	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bloodrise"	, isUnique: true, isArmor: false ,code: 'mst', craft: false, tier: 1},
+	{ id: 520	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The General's Tan Do Li Ga"	, isUnique: true, isArmor: false ,code: 'fla', craft: false, tier: 1},
+	{ id: 522	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Ironstone"	, isUnique: true, isArmor: false ,code: 'whm', craft: false, tier: 1},
+	{ id: 524	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bonesnap"	, isUnique: true, isArmor: false ,code: 'mau', craft: false, tier: 1},
+	{ id: 526	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Steeldriver"	, isUnique: true, isArmor: false ,code: 'gma', craft: false, tier: 1},
+	{ id: 529	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Rixot's Keen"	, isUnique: true, isArmor: false ,code: 'ssd', craft: false, tier: 1},
+	{ id: 530	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Blood Crescent"	, isUnique: true, isArmor: false ,code: 'scm', craft: false, tier: 1},
+	{ id: 531	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Skewer of Krintiz"	, isUnique: true, isArmor: false ,code: 'sbr', craft: false, tier: 1},
+	{ id: 532	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Angelic Sickle"	, isUnique: false, isArmor: false ,code: 'sbr', craft: false, tier: 1},
+	{ id: 533	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Gleamscythe"	, isUnique: true, isArmor: false ,code: 'flc', craft: false, tier: 1},
+	{ id: 536	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Griswold's Edge"	, isUnique: true, isArmor: false ,code: 'bsd', craft: false, tier: 1},
+	{ id: 537	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Isenhart's Lightbrand"	, isUnique: false, isArmor: false ,code: 'bsd', craft: false, tier: 1},
+	{ id: 538	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hellplague"	, isUnique: true, isArmor: false ,code: 'lsd', craft: false, tier: 1},
+	{ id: 539	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Cleglaw's Tooth"	, isUnique: false, isArmor: false ,code: 'lsd', craft: false, tier: 1},
+	{ id: 540	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Culwen's Point"	, isUnique: true, isArmor: false ,code: 'wsd', craft: false, tier: 1},
+	{ id: 541	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Death's Touch"	, isUnique: false, isArmor: false ,code: 'wsd', craft: false, tier: 1},
+	{ id: 542	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Shadowfang"	, isUnique: true, isArmor: false ,code: '2hs', craft: false, tier: 1},
+	{ id: 543	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Soulflay"	, isUnique: true, isArmor: false ,code: 'clm', craft: false, tier: 1},
+	{ id: 544	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Kinemil's Awl"	, isUnique: true, isArmor: false ,code: 'gis', craft: false, tier: 1},
+	{ id: 545	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Blacktongue"	, isUnique: true, isArmor: false ,code: 'bsw', craft: false, tier: 1},
+	{ id: 546	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Ripsaw"	, isUnique: true, isArmor: false ,code: 'flb', craft: false, tier: 1},
+	{ id: 548	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Patriarch"	, isUnique: true, isArmor: false ,code: 'gsd', craft: false, tier: 1},
+	{ id: 551	, level: 'Low'	, mightCorrupt: true	, mcTags: ['FCR','MF','SK']	, name: "Gull"	, isUnique: true, isArmor: false ,code: 'dgr', craft: false, tier: 1},
+	{ id: 552	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Infernal Spire"	, isUnique: false, isArmor: false ,code: 'dgr', craft: false, tier: 1},
+	{ id: 553	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Diggler"	, isUnique: true, isArmor: false ,code: 'dir', craft: false, tier: 1},
+	{ id: 554	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Jade Tan Do"	, isUnique: true, isArmor: false ,code: 'kri', craft: false, tier: 1},
+	{ id: 555	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Spectral Shard"	, isUnique: true, isArmor: false ,code: 'bld', craft: false, tier: 1},
+	{ id: 556	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Dragon Chang"	, isUnique: true, isArmor: false ,code: 'spr', craft: false, tier: 1},
+	{ id: 557	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Razortine"	, isUnique: true, isArmor: false ,code: 'tri', craft: false, tier: 1},
+	{ id: 558	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bloodthief"	, isUnique: true, isArmor: false ,code: 'brn', craft: false, tier: 1},
+	{ id: 559	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Lance of Yaggai"	, isUnique: true, isArmor: false ,code: 'spt', craft: false, tier: 1},
+	{ id: 560	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Tannr Gorerod"	, isUnique: true, isArmor: false ,code: 'pik', craft: false, tier: 1},
+	{ id: 561	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Dimoak's Hew"	, isUnique: true, isArmor: false ,code: 'bar', craft: false, tier: 1},
+	{ id: 562	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Steelgoad"	, isUnique: true, isArmor: false ,code: 'vou', craft: false, tier: 1},
+	{ id: 564	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Soul Harvest"	, isUnique: true, isArmor: false ,code: 'scy', craft: false, tier: 1},
+	{ id: 565	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Battlebranch"	, isUnique: true, isArmor: false ,code: 'pax', craft: false, tier: 1},
+	{ id: 566	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Woestave"	, isUnique: true, isArmor: false ,code: 'hal', craft: false, tier: 1},
+	{ id: 567	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Grim Reaper"	, isUnique: true, isArmor: false ,code: 'wsc', craft: false, tier: 1},
+	{ id: 569	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Pluckeye"	, isUnique: true, isArmor: false ,code: 'sbw', craft: false, tier: 1},
+	{ id: 570	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Witherstring"	, isUnique: true, isArmor: false ,code: 'hbw', craft: false, tier: 1},
+	{ id: 571	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Raven Claw"	, isUnique: true, isArmor: false ,code: 'lbw', craft: false, tier: 1},
+	{ id: 572	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Rogue's Bow"	, isUnique: true, isArmor: false ,code: 'cbw', craft: false, tier: 1},
+	{ id: 573	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Stormstrike"	, isUnique: true, isArmor: false ,code: 'sbb', craft: false, tier: 1},
+	{ id: 574	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Wizendraw"	, isUnique: true, isArmor: false ,code: 'lbb', craft: false, tier: 1},
+	{ id: 575	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Vidala's Barb"	, isUnique: false, isArmor: false ,code: 'lbb', craft: false, tier: 1},
+	{ id: 576	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hellclap"	, isUnique: true, isArmor: false ,code: 'swb', craft: false, tier: 1},
+	{ id: 577	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Arctic Horn"	, isUnique: false, isArmor: false ,code: 'swb', craft: false, tier: 1},
+	{ id: 578	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Blastbark"	, isUnique: true, isArmor: false ,code: 'lwb', craft: false, tier: 1},
+	{ id: 580	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Leadcrow"	, isUnique: true, isArmor: false ,code: 'lxb', craft: false, tier: 1},
+	{ id: 581	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Ichorsting"	, isUnique: true, isArmor: false ,code: 'mxb', craft: false, tier: 1},
+	{ id: 582	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hellcast"	, isUnique: true, isArmor: false ,code: 'hxb', craft: false, tier: 1},
+	{ id: 583	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Doomslinger"	, isUnique: true, isArmor: false ,code: 'rxb', craft: false, tier: 1},
+	{ id: 585	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bane Ash"	, isUnique: true, isArmor: false ,code: 'sst', craft: false, tier: 1},
+	{ id: 586	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Serpent Lord"	, isUnique: true, isArmor: false ,code: 'lst', craft: false, tier: 1},
+	{ id: 587	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Spire of Lazarus"	, isUnique: true, isArmor: false ,code: 'cst', craft: false, tier: 1},
+	{ id: 589	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Salamander"	, isUnique: true, isArmor: false ,code: 'bst', craft: false, tier: 1},
+	{ id: 590	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Cathan's Rule"	, isUnique: false, isArmor: false ,code: 'bst', craft: false, tier: 1},
+	{ id: 591	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Iron Jang Bong"	, isUnique: true, isArmor: false ,code: 'wst', craft: false, tier: 1},
+	{ id: 592	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Arcanna's Deathwand"	, isUnique: false, isArmor: false ,code: 'wst', craft: false, tier: 1},
+	{ id: 594	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Torch of Iro"	, isUnique: true, isArmor: false ,code: 'wnd', craft: false, tier: 1},
+	{ id: 595	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Maelstrom"	, isUnique: true, isArmor: false ,code: 'ywn', craft: false, tier: 1},
+	{ id: 596	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Gravenspine"	, isUnique: true, isArmor: false ,code: 'bwn', craft: false, tier: 1},
+	{ id: 597	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sander's Superstition"	, isUnique: false, isArmor: false ,code: 'bwn', craft: false, tier: 1},
+	{ id: 598	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Ume's Lament"	, isUnique: true, isArmor: false ,code: 'gwn', craft: false, tier: 1},
+	{ id: 600	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Knell Striker"	, isUnique: true, isArmor: false ,code: 'scp', craft: false, tier: 1},
+	{ id: 602	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Rusthandle"	, isUnique: true, isArmor: false ,code: 'gsc', craft: false, tier: 1},
+	{ id: 603	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Civerb's Cudgel"	, isUnique: false, isArmor: false ,code: 'gsc', craft: false, tier: 1},
+	{ id: 604	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Stormeye"	, isUnique: true, isArmor: false ,code: 'wsp', craft: false, tier: 1},
+	{ id: 605	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Milabrega's Rod"	, isUnique: false, isArmor: false ,code: 'wsp', craft: false, tier: 1},
+	{ id: 606	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "True Silver (new)"	, isUnique: true, isArmor: false ,code: 'am5', craft: false, tier: 1},
+	{ id: 609	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Coldkill"	, isUnique: true, isArmor: false ,code: '9ha', craft: false, tier: 2},
+	{ id: 610	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Butcher's Pupil"	, isUnique: true, isArmor: false ,code: '9ax', craft: false, tier: 2},
+	{ id: 611	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Islestrike"	, isUnique: true, isArmor: false ,code: '92a', craft: false, tier: 2},
+	{ id: 613	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Pompeii's Wrath"	, isUnique: true, isArmor: false ,code: '9mp', craft: false, tier: 2},
+	{ id: 615	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Guardian Naga"	, isUnique: true, isArmor: false ,code: '9wa', craft: false, tier: 2},
+	{ id: 616	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Warlord's Trust"	, isUnique: true, isArmor: false ,code: '9la', craft: false, tier: 2},
+	{ id: 617	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Spellsteel"	, isUnique: true, isArmor: false ,code: '9ba', craft: false, tier: 2},
+	{ id: 618	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Stormrider"	, isUnique: true, isArmor: false ,code: '9bt', craft: false, tier: 2},
+	{ id: 619	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Boneslayer Blade"	, isUnique: true, isArmor: false ,code: '9ga', craft: false, tier: 2},
+	{ id: 620	, level: 'Low'	, mightCorrupt: false	, mcTags: ['6SOX']	, name: "The Minotaur"	, isUnique: true, isArmor: false ,code: '9gi', craft: false, tier: 2},
+	{ id: 622	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Dark Clan Crusher"	, isUnique: true, isArmor: false ,code: '9cl', craft: false, tier: 2},
+	{ id: 623	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Fleshrender"	, isUnique: true, isArmor: false ,code: '9sp', craft: false, tier: 2},
+	{ id: 624	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sureshrill Frost"	, isUnique: true, isArmor: false ,code: '9ma', craft: false, tier: 2},
+	{ id: 625	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Moonfall"	, isUnique: true, isArmor: false ,code: '9mt', craft: false, tier: 2},
+	{ id: 626	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Aldur's Rhythm"	, isUnique: false, isArmor: false ,code: '9mt', craft: false, tier: 2},
+	{ id: 627	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Baezil's Vortex"	, isUnique: true, isArmor: false ,code: '9fl', craft: false, tier: 2},
+	{ id: 629	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Earthshaker"	, isUnique: true, isArmor: false ,code: '9wh', craft: false, tier: 2},
+	{ id: 631	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Bloodtree Stump"	, isUnique: true, isArmor: false ,code: '9m9', craft: false, tier: 2},
+	{ id: 633	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Gavel of Pain"	, isUnique: true, isArmor: false ,code: '9gm', craft: false, tier: 2},
+	{ id: 636	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bloodletter"	, isUnique: true, isArmor: false ,code: '9ss', craft: false, tier: 2},
+	{ id: 637	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Coldsteel Eye"	, isUnique: true, isArmor: false ,code: '9sm', craft: false, tier: 2},
+	{ id: 638	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Hexfire"	, isUnique: true, isArmor: false ,code: '9sb', craft: false, tier: 2},
+	{ id: 640	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Blade of Ali Baba"	, isUnique: true, isArmor: false ,code: '9fc', craft: false, tier: 2},
+	{ id: 641	, level: 'Low'	, mightCorrupt: true	, mcTags: ['SOX']	, name: "Ginther's Rift"	, isUnique: true, isArmor: false ,code: '9cr', craft: false, tier: 2},
+	{ id: 643	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Headstriker"	, isUnique: true, isArmor: false ,code: '9bs', craft: false, tier: 2},
+	{ id: 645	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['SOX']	, name: "Plague Bearer"	, isUnique: true, isArmor: false ,code: '9ls', craft: false, tier: 2},
+	{ id: 647	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Atlantean"	, isUnique: true, isArmor: false ,code: '9wd', craft: false, tier: 2},
+	{ id: 649	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Crainte Vomir"	, isUnique: true, isArmor: false ,code: '92h', craft: false, tier: 2},
+	{ id: 650	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Bing Sz Wang"	, isUnique: true, isArmor: false ,code: '9cm', craft: false, tier: 2},
+	{ id: 651	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Vile Husk"	, isUnique: true, isArmor: false ,code: '9gs', craft: false, tier: 2},
+	{ id: 652	, level: 'Low'	, mightCorrupt: true	, mcTags: ['SOX']	, name: "Cloudcrack"	, isUnique: true, isArmor: false ,code: '9b9', craft: false, tier: 2},
+	{ id: 653	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Todesfaelle Flamme"	, isUnique: true, isArmor: false ,code: '9fb', craft: false, tier: 2},
+	{ id: 655	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Swordguard"	, isUnique: true, isArmor: false ,code: '9gd', craft: false, tier: 2},
+	{ id: 658	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Spineripper"	, isUnique: true, isArmor: false ,code: '9dg', craft: false, tier: 2},
+	{ id: 660	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['Random']	, name: "Heart Carver"	, isUnique: true, isArmor: false ,code: '9di', craft: false, tier: 2},
+	{ id: 661	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Blackbog's Sharp"	, isUnique: true, isArmor: false ,code: '9kr', craft: false, tier: 2},
+	{ id: 662	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Stormspike"	, isUnique: true, isArmor: false ,code: '9bl', craft: false, tier: 2},
+	{ id: 664	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Deathbit"	, isUnique: true, isArmor: false ,code: '9tk', craft: false, tier: 2},
+	{ id: 666	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Scalper"	, isUnique: true, isArmor: false ,code: '9ta', craft: false, tier: 2},
+	{ id: 668	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Achilles Strike (new)"	, isUnique: true, isArmor: false ,code: '9b8', craft: false, tier: 2},
+	{ id: 676	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Impaler"	, isUnique: true, isArmor: false ,code: '9sr', craft: false, tier: 2},
+	{ id: 677	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Kelpie Snare"	, isUnique: true, isArmor: false ,code: '9tr', craft: false, tier: 2},
+	{ id: 678	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Soulfeast Tine"	, isUnique: true, isArmor: false ,code: '9br', craft: false, tier: 2},
+	{ id: 679	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Hone Sundan"	, isUnique: true, isArmor: false ,code: '9st', craft: false, tier: 2},
+	{ id: 680	, level: 'Low'	, mightCorrupt: false	, mcTags: ['6SOX']	, name: "Spire of Honor"	, isUnique: true, isArmor: false ,code: '9p9', craft: false, tier: 2},
+	{ id: 681	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "The Meat Scraper"	, isUnique: true, isArmor: false ,code: '9b7', craft: false, tier: 2},
+	{ id: 682	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Blackleach Blade"	, isUnique: true, isArmor: false ,code: '9vo', craft: false, tier: 2},
+  { id: 683	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Hwanin's Justice"	, isUnique: false, isArmor: false ,code: '9vo', craft: false, tier: 2},
+	{ id: 684	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['Random']	, name: "Athena's Wrath"	, isUnique: true, isArmor: false ,code: '9s8', craft: false, tier: 2},
+	{ id: 685	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Pierre Tombale Couant"	, isUnique: true, isArmor: false ,code: '9pa', craft: false, tier: 2},
+	{ id: 686	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Husoldal Evo"	, isUnique: true, isArmor: false ,code: '9h9', craft: false, tier: 2},
+	{ id: 687	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Grim's Burning Dead"	, isUnique: true, isArmor: false ,code: '9wc', craft: false, tier: 2},
+	{ id: 689	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Skystrike"	, isUnique: true, isArmor: false ,code: '8sb', craft: false, tier: 2},
+	{ id: 690	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Riphook"	, isUnique: true, isArmor: false ,code: '8hb', craft: false, tier: 2},
+	{ id: 691	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Kuko Shakaku"	, isUnique: true, isArmor: false ,code: '8lb', craft: false, tier: 2},
+	{ id: 692	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Endlesshail"	, isUnique: true, isArmor: false ,code: '8cb', craft: false, tier: 2},
+	{ id: 693	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Witchwild String"	, isUnique: true, isArmor: false ,code: '8s8', craft: false, tier: 2},
+	{ id: 694	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Cliffkiller"	, isUnique: true, isArmor: false ,code: '8l8', craft: false, tier: 2},
+	{ id: 696	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Magewrath"	, isUnique: true, isArmor: false ,code: '8sw', craft: false, tier: 2},
+	{ id: 698	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Goldstrike Arch"	, isUnique: true, isArmor: false ,code: '8lw', craft: false, tier: 2},
+	{ id: 700	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Langer Briser"	, isUnique: true, isArmor: false ,code: '8lx', craft: false, tier: 2},
+	{ id: 701	, level: 'God'	, mightCorrupt: true	, mcTags: ['SOX']	, name: "Pus Spitter"	, isUnique: true, isArmor: false ,code: '8mx', craft: false, tier: 2},
+	{ id: 702	, level: 'God'	, mightCorrupt: true	, mcTags: ['6SOX']	, name: "Buriza-Do Kyanon"	, isUnique: true, isArmor: false ,code: '8hx', craft: false, tier: 2},
+	{ id: 703	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Demon Machine"	, isUnique: true, isArmor: false ,code: '8rx', craft: false, tier: 2},
+	{ id: 705	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Razorswitch"	, isUnique: true, isArmor: false ,code: '8ss', craft: false, tier: 2},
+	{ id: 706	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ribcracker"	, isUnique: true, isArmor: false ,code: '8ls', craft: false, tier: 2},
+	{ id: 707	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Chromatic Ire"	, isUnique: true, isArmor: false ,code: '8cs', craft: false, tier: 2},
+	{ id: 709	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Warpspear"	, isUnique: true, isArmor: false ,code: '8bs', craft: false, tier: 2},
+	{ id: 711	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Skull Collector"	, isUnique: true, isArmor: false ,code: '8ws', craft: false, tier: 2},
+	{ id: 714	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Suicide Branch"	, isUnique: true, isArmor: false ,code: '9wn', craft: false, tier: 2},
+	{ id: 715	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Carin Shard"	, isUnique: true, isArmor: false ,code: '9yw', craft: false, tier: 2},
+	{ id: 716	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['SOX']	, name: "Arm of King Leoric"	, isUnique: true, isArmor: false ,code: '9bw', craft: false, tier: 2},
+	{ id: 718	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Blackhand Key"	, isUnique: true, isArmor: false ,code: '9gw', craft: false, tier: 2},
+	{ id: 720	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Zakarum's Hand"	, isUnique: true, isArmor: false ,code: '9sc', craft: false, tier: 2},
+	{ id: 722	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Fetid Sprinkler"	, isUnique: true, isArmor: false ,code: '9qs', craft: false, tier: 2},
+	{ id: 724	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['SOX']	, name: "Hand of Blessed Light"	, isUnique: true, isArmor: false ,code: '9ws', craft: false, tier: 2},
+	{ id: 727	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Mage Slayer (new)"	, isUnique: true, isArmor: false ,code: '9ar', craft: false, tier: 2},
+	{ id: 732	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Bartuc's Cut-Throat"	, isUnique: true, isArmor: false ,code: '9tw', craft: false, tier: 2},
+	{ id: 736	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['FCR']	, name: "Tempest (new)"	, isUnique: true, isArmor: false ,code: 'ob6', craft: false, tier: 2},
+	{ id: 737	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Skorn (new)"	, isUnique: true, isArmor: false ,code: 'ob7', craft: false, tier: 2},
+	{ id: 740	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Oculus"	, isUnique: true, isArmor: false ,code: 'oba', craft: false, tier: 2},
+	{ id: 741	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Tal Rasha's Lidless Eye"	, isUnique: false, isArmor: false ,code: 'oba', craft: false, tier: 2},
+	{ id: 742	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Lycander's Aim"	, isUnique: true, isArmor: false ,code: 'am7', craft: false, tier: 2},
+	{ id: 745	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Lycander's Flank"	, isUnique: true, isArmor: false ,code: 'am9', craft: false, tier: 2},
+	{ id: 746	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['SK','DStrike']	, name: "Titan's Revenge"	, isUnique: true, isArmor: false ,code: 'ama', craft: false, tier: 2},
+	{ id: 749	, level: 'Low'	, mightCorrupt: true	, mcTags: ['3SOX']	, name: "Razor's Edge"	, isUnique: true, isArmor: false ,code: '7ha', craft: false, tier: 3},
+	{ id: 751	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Rune Master"	, isUnique: true, isArmor: false ,code: '72a', craft: false, tier: 3},
+	{ id: 753	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['SOX']	, name: "Cranebeak"	, isUnique: true, isArmor: false ,code: '7mp', craft: false, tier: 3},
+	{ id: 755	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Death Cleaver"	, isUnique: true, isArmor: false ,code: '7wa', craft: false, tier: 3},
+	{ id: 757	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ethereal Edge"	, isUnique: true, isArmor: false ,code: '7ba', craft: false, tier: 3},
+	{ id: 758	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Hellslayer"	, isUnique: true, isArmor: false ,code: '7bt', craft: false, tier: 3},
+	{ id: 759	, level: 'God'	, mightCorrupt: true	, mcTags: ['6SOX']	, name: "Messerschmidt's Reaver"	, isUnique: true, isArmor: false ,code: '7ga', craft: false, tier: 3},
+	{ id: 760	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Executioner's Justice"	, isUnique: true, isArmor: false ,code: '7gi', craft: false, tier: 3},
+	{ id: 762	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Nord's Tenderizer"	, isUnique: true, isArmor: false ,code: '7cl', craft: false, tier: 3},
+	{ id: 763	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['3SOX']	, name: "Demon Limb"	, isUnique: true, isArmor: false ,code: '7sp', craft: false, tier: 3},
+  { id: 764	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['3SOX','FCR+SKDmg',]	, name: "Dangoon's Teaching"	, isUnique: false, isArmor: false ,code: '7ma', craft: false, tier: 3},
+	{ id: 765	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Baranar's Star"	, isUnique: true, isArmor: false ,code: '7mt', craft: false, tier: 3},
+	{ id: 767	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Horizon's Tornado"	, isUnique: true, isArmor: false ,code: '7fl', craft: false, tier: 3},
+	{ id: 768	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Stormlash"	, isUnique: true, isArmor: false ,code: '7fl', craft: false, tier: 3},
+	{ id: 769	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Stone Crusher"	, isUnique: true, isArmor: false ,code: '7wh', craft: false, tier: 3},
+	{ id: 770	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Schaefer's Hammer"	, isUnique: true, isArmor: false ,code: '7wh', craft: false, tier: 3},
+	{ id: 771	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Windhammer"	, isUnique: true, isArmor: false ,code: '7m7', craft: false, tier: 3},
+	{ id: 772	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Immortal King's Stone Crusher"	, isUnique: false, isArmor: false ,code: '7m7', craft: false, tier: 3},
+	{ id: 773	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Earth Shifter"	, isUnique: true, isArmor: false ,code: '7gm', craft: false, tier: 3},
+	{ id: 774	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Cranium Basher"	, isUnique: true, isArmor: false ,code: '7gm', craft: false, tier: 3},
+	{ id: 777	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Djinn Slayer"	, isUnique: true, isArmor: false ,code: '7sm', craft: false, tier: 3},
+	{ id: 778	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bloodmoon"	, isUnique: true, isArmor: false ,code: '7sb', craft: false, tier: 3},
+	{ id: 781	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Lightsabre"	, isUnique: true, isArmor: false ,code: '7cr', craft: false, tier: 3},
+	{ id: 782	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Azurewrath"	, isUnique: true, isArmor: false ,code: '7cr', craft: false, tier: 3},
+	{ id: 783	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Hadriel's Hand (new)"	, isUnique: true, isArmor: false ,code: '7bs', craft: false, tier: 3},
+  { id: 785	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Frostwind"	, isUnique: true, isArmor: false ,code: '7ls', craft: false, tier: 3},
+	{ id: 786	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Sazabi's Cobalt Redeemer"	, isUnique: false, isArmor: false ,code: '7ls', craft: false, tier: 3},
+	{ id: 790	, level: 'Low'	, mightCorrupt: false	, mcTags: ['SOX']	, name: "Leoric's Mithril Bane (new)"	, isUnique: true, isArmor: false ,code: '7cm', craft: false, tier: 3},
+	{ id: 791	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Flamebellow"	, isUnique: true, isArmor: false ,code: '7gs', craft: false, tier: 3},
+	{ id: 792	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['SOX']	, name: "Doombringer"	, isUnique: true, isArmor: false ,code: '7b7', craft: false, tier: 3},
+	{ id: 793	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Odium (new)"	, isUnique: true, isArmor: false ,code: '7fb', craft: false, tier: 3},
+	{ id: 794	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bul-Kathos' Tribal Guardian"	, isUnique: false, isArmor: false ,code: '7fb', craft: false, tier: 3},
+	{ id: 795	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Grandfather"	, isUnique: true, isArmor: false ,code: '7gd', craft: false, tier: 3},
+  { id: 796	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['6SOX']	, name: "Bul-Kathos' Sacred Charge"	, isUnique: false, isArmor: false ,code: '7gd', craft: false, tier: 3},
+	{ id: 798	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Wizardspike"	, isUnique: true, isArmor: false ,code: '7dg', craft: false, tier: 3},
+	{ id: 800	, level: 'Low'	, mightCorrupt: false	, mcTags: ['SK','DS']	, name: "Shatterblade (new)"	, isUnique: true, isArmor: false ,code: '7di', craft: false, tier: 3},
+	{ id: 801	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Fleshripper"	, isUnique: true, isArmor: false ,code: '7kr', craft: false, tier: 3},
+	{ id: 802	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ghostflame"	, isUnique: true, isArmor: false ,code: '7bl', craft: false, tier: 3},
+	{ id: 806	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Gimmershred"	, isUnique: true, isArmor: false ,code: '7ta', craft: false, tier: 3},
+	{ id: 807	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['EDmg','SOX']	, name: "Warshrike"	, isUnique: true, isArmor: false ,code: '7bk', craft: false, tier: 3},
+	{ id: 808	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Lacerator"	, isUnique: true, isArmor: false ,code: '7b8', craft: false, tier: 3},
+	{ id: 812	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Demon's Arch"	, isUnique: true, isArmor: false ,code: '7s7', craft: false, tier: 3},
+	{ id: 813	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Wraith Flight"	, isUnique: true, isArmor: false ,code: '7gl', craft: false, tier: 3},
+	{ id: 814	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Gargoyle's Bite"	, isUnique: true, isArmor: false ,code: '7ts', craft: false, tier: 3},
+  { id: 816	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Arioc's Needle"	, isUnique: true, isArmor: false ,code: '7sr', craft: false, tier: 3},
+	{ id: 818	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Viperfork"	, isUnique: true, isArmor: false ,code: '7br', craft: false, tier: 3},
+	{ id: 819	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Uldyssian's Awakening (new)"	, isUnique: true, isArmor: false ,code: '7st', craft: false, tier: 3},
+	{ id: 820	, level: 'God'	, mightCorrupt: true	, mcTags: ['6SOX']	, name: "Steel Pillar"	, isUnique: true, isArmor: false ,code: '7p7', craft: false, tier: 3},
+	{ id: 821	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Bonehew"	, isUnique: true, isArmor: false ,code: '7o7', craft: false, tier: 3},
+	{ id: 824	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Reaper's Toll"	, isUnique: true, isArmor: false ,code: '7s8', craft: false, tier: 3},
+  { id: 825	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['EDmg','IAS']	, name: "Tomb Reaver"	, isUnique: true, isArmor: false ,code: '7pa', craft: false, tier: 3},
+	{ id: 827	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['6SOX']	, name: "Stormspire"	, isUnique: true, isArmor: false ,code: '7wc', craft: false, tier: 3},
+	{ id: 830	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['SOX']	, name: "Crackleshot (new)"	, isUnique: true, isArmor: false ,code: '6hb', craft: false, tier: 3},
+	{ id: 834	, level: 'Mid'	, mightCorrupt: false	, mcTags: ['6SOX']	, name: "Eaglehorn"	, isUnique: true, isArmor: false ,code: '6l7', craft: false, tier: 3},
+	{ id: 836	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['SK','SOX']	, name: "Widowmaker"	, isUnique: true, isArmor: false ,code: '6sw', craft: false, tier: 3},
+	{ id: 838	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Windforce"	, isUnique: true, isArmor: false ,code: '6lw', craft: false, tier: 3},
+	{ id: 842	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Hellrack"	, isUnique: true, isArmor: false ,code: '6hx', craft: false, tier: 3},
+	{ id: 843	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Gut Siphon"	, isUnique: true, isArmor: false ,code: '6rx', craft: false, tier: 3},
+	{ id: 847	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ondal's Wisdom"	, isUnique: true, isArmor: false ,code: '6cs', craft: false, tier: 3},
+  { id: 848	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Naj's Puzzler (+tp)"	, isUnique: false, isArmor: false ,code: '6cs', craft: false, tier: 3},
+	{ id: 849	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Brimstone Rain (new)"	, isUnique: true, isArmor: false ,code: '6bs', craft: false, tier: 3},
+	{ id: 851	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Mang Song's Lesson"	, isUnique: true, isArmor: false ,code: '6ws', craft: false, tier: 3},
+	{ id: 856	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Boneshade"	, isUnique: true, isArmor: false ,code: '7bw', craft: false, tier: 3},
+	{ id: 858	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Death's Web"	, isUnique: true, isArmor: false ,code: '7gw', craft: false, tier: 3},
+	{ id: 860	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Heaven's Light"	, isUnique: true, isArmor: false ,code: '7sc', craft: false, tier: 3},
+	{ id: 861	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "The Redeemer"	, isUnique: true, isArmor: false ,code: '7sc', craft: false, tier: 3},
+	{ id: 862	, level: 'Low'	, mightCorrupt: false	, mcTags: []	, name: "Akarat's Devotion (new)"	, isUnique: true, isArmor: false ,code: '7qs', craft: false, tier: 3},
+	{ id: 864	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Astreon's Iron Ward"	, isUnique: true, isArmor: false ,code: '7ws', craft: false, tier: 3},
+  { id: 865	, level: 'Mid'	, mightCorrupt: false	, mcTags: []	, name: "Griswold's Redemption"	, isUnique: false, isArmor: false ,code: '7ws', craft: false, tier: 3},
+  { id: 868	, level: 'Mid'	, mightCorrupt: true	, mcTags: ['EDmg','LLeech','SOX']	, name: "Jade Talon"	, isUnique: true, isArmor: false ,code: '7wb', craft: false, tier: 3},
+	{ id: 869	, level: 'God'	, mightCorrupt: true	, mcTags: ['FCR','SK','SOX']	, name: "Whispering Mirage (new)"	, isUnique: true, isArmor: false ,code: '7xf', craft: false, tier: 3},
+	{ id: 870	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Shadow Killer"	, isUnique: true, isArmor: false ,code: '7cs', craft: false, tier: 3},
+	{ id: 871	, level: 'God'	, mightCorrupt: true	, mcTags: ['3SOX']	, name: "Firelizard's Talons"	, isUnique: true, isArmor: false ,code: '7lw', craft: false, tier: 3},
+	{ id: 872	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Stalker's Cull (new)"	, isUnique: true, isArmor: false ,code: '7tw', craft: false, tier: 3},
+	{ id: 873	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Aidan's Scar (new)"	, isUnique: true, isArmor: false ,code: '7qr', craft: false, tier: 3},
+	{ id: 874	, level: 'God'	, mightCorrupt: true	, mcTags: ['Random']	, name: "Natalya's Mark"	, isUnique: false, isArmor: false ,code: '7qr', craft: false, tier: 3},
+	{ id: 877	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Eschuta's Temper"	, isUnique: true, isArmor: false ,code: 'obc', craft: false, tier: 3},
+	{ id: 880	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Death's Fathom"	, isUnique: true, isArmor: false ,code: 'obf', craft: false, tier: 3},
+	{ id: 883	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Blood Raven's Charge"	, isUnique: true, isArmor: false ,code: 'amb', craft: false, tier: 3},
+	{ id: 884	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Ebonbane (new)"	, isUnique: true, isArmor: false ,code: 'amc', craft: false, tier: 3},
+	{ id: 885	, level: 'God'	, mightCorrupt: true	, mcTags: ['SOX']	, name: "M'avina's Caster"	, isUnique: false, isArmor: false ,code: 'amc', craft: false, tier: 3},
+	{ id: 886	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Stoneraven"	, isUnique: true, isArmor: false ,code: 'amd', craft: false, tier: 3},
+	{ id: 887	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Zerae's Resolve (new)"	, isUnique: true, isArmor: false ,code: 'ame', craft: false, tier: 3},
+	{ id: 888	, level: 'God'	, mightCorrupt: false	, mcTags: []	, name: "Thunderstroke"	, isUnique: true, isArmor: false ,code: 'amf', craft: false, tier: 3},
+          ],
+          maps:[
+{id:2, level: 'Mid', name: "Ruins of Viz-Jun Map", code: 't11', tier: 2},
+{id:3, level: 'Mid', name: "Horazon's Memory Map", code: 't12', tier: 1},
+{id:4, level: 'Mid', name: "Bastion Keep Map", code: 't13', tier: 1},
+{id:5, level: 'Mid', name: "Sanatorium Map", code: 't14', tier: 3},
+{id:6, level: 'Mid', name: "Royal Crypts Map", code: 't15', tier: 1},
+{id:7, level: 'Mid', name: "Ruined Cistern Map", code: 't16', tier: 3},
+{id:8, level: 'Mid', name: "Halls of Torture Map", code: 't17', tier: 1},
+{id:9, level: 'Mid', name: "Phlegethon Map", code: 't21', tier: 3},
+{id:10, level: 'Mid', name: "Torajan Jungle Map", code: 't22', tier: 1},
+{id:11, level: 'Mid', name: "Arreat Battlefield Map", code: 't23', tier: 1},
+{id:12, level: 'Mid', name: "Tomb of Zoltun Kulle Map", code: 't24', tier: 2},
+{id:13, level: 'Mid', name: "Sewers of Harrogath Map", code: 't25', tier: 1},
+{id:14, level: 'Mid', name: "Shadows of Westmarch Map", code: 't26', tier: 1},
+{id:15, level: 'Mid', name: "Demon Road", code: 't27', tier: 2},
+{id:16, level: 'Mid', name: "Skovos Stronghold", code: 't28', tier: 2},
+{id:17, level: 'Mid', name: "River of Blood Map", code: 't31', tier: 2},
+{id:18, level: 'Mid', name: "Throne of Insanity Map", code: 't32', tier: 3},
+{id:19, level: 'Mid', name: "Lost Temple Map", code: 't33', tier: 2},
+{id:20, level: 'Mid', name: "Ancestral Trial Map", code: 't34', tier: 2},
+{id:21, level: 'Mid', name: "Blood Moon Map", code: 't35', tier: 3},
+{id:22, level: 'Mid', name: "Fall of Caldeum Map", code: 't36', tier: 1},
+{id:23, level: 'Mid', name: "Pandemonium Citadel Map", code: 't37', tier: 3},
+{id:24, level: 'Mid', name: "Canyon of Sescheron Map", code: 't38', tier: 3},
+{id:25, level: 'Mid', name: "Kehjistan Marketplace Map", code: 't39', tier: 3},
+{id:26, level: 'Mid', name: "Ashen Plains Map", code: 't3a', tier: 3},
+          ],
+          items: [],
+          activeTab: 'items',
+          filtersCollapsed: true,
+          darkMode: (localStorage.getItem('darkMode') ?? 'true') === 'true',
+          nameDisplayMode: (localStorage.getItem('nameDisplayMode') === 'filter') ? 'filter' : 'short',
+          showCraftColumn: false,
+          showCraftFilter: false,
+          tempMcTags: {},
+          filters: {
+            search: '',
+            unique: 'all',
+            isArmor: 'all',
+            mc: 'all',
+            craft: 'all',
+            level: 'all',
+            tags: []
+          },
+          mapFilters: {
+            search: '',
+            tier: 'all',
+            level: 'all'
+          },
+          hideMapGroupRows: false,
+          sortKey: 'name',
+          sortAsc: true,
+          importedFileName: '',
+          importedRawContent: '',
+          pendingImport: '',
+          dirHandle: null,
+          filterFileHandle: null
+        };
+      },
+      created() {
+        this.resetAll();
+      },
+      mounted() {
+        if (this.darkMode) {
+          document.body.classList.add('dark-mode');
+        }
+        this.restoreHandles();
+      },
+      computed: {
+        headerSearch: {
+          get() {
+            if (this.activeTab === 'maps') {
+              return this.mapFilters.search;
+            }
+            return this.filters.search;
+          },
+          set(value) {
+            if (this.activeTab === 'maps') {
+              this.mapFilters.search = value;
+            } else {
+              this.filters.search = value;
+            }
+          }
+        },
+        filteredAndSortedItems() {
+          const levelOrder = { Low: 1, Mid: 2, God: 3 };
+          let arr = this.items.filter(item => {
+            const s = this.filters.search.trim().toLowerCase();
+            const matchesSearch = s === '' || item.name.toLowerCase().includes(s) || item.code.toLowerCase().includes(s);
+
+            const matchesUnique = this.filters.unique === 'all' ||
+              (this.filters.unique === 'unique' && item.isUnique) ||
+              (this.filters.unique === 'set' && !item.isUnique);
+
+            const matchesArmor = this.filters.isArmor === 'all' ||
+              (this.filters.isArmor === 'armor' && item.isArmor) ||
+              (this.filters.isArmor === 'weapon' && !item.isArmor);
+
+            const matchesMC = this.filters.mc === 'all' ||
+              (this.filters.mc === 'yes' && item.mightCorrupt) ||
+              (this.filters.mc === 'no' && !item.mightCorrupt);
+
+            const matchesCraft = this.filters.craft === 'all' ||
+              (this.filters.craft === 'yes' && item.craft) ||
+              (this.filters.craft === 'no' && !item.craft);
+
+            const matchesLevel = this.filters.level === 'all' || item.level === this.filters.level;
+
+            const matchesTags = this.filters.tags.length === 0 ||
+              item.mcTags.some(t => this.filters.tags.includes(t));
+
+            return matchesSearch && matchesUnique && matchesArmor && matchesMC && matchesCraft && matchesLevel && matchesTags;
+          });
+
+          arr.sort((a, b) => {
+            let va, vb;
+            switch (this.sortKey) {
+              case 'name':
+                va = a.name; vb = b.name; break;
+              case 'code':
+                va = a.code; vb = b.code; break;
+              case 'isUnique':
+                va = a.isUnique; vb = b.isUnique; break;
+              case 'isArmor':
+                va = a.isArmor; vb = b.isArmor; break;
+              case 'mightCorrupt':
+                va = a.mightCorrupt; vb = b.mightCorrupt; break;
+              case 'craft':
+                va = a.craft; vb = b.craft; break;
+              case 'level':
+                va = levelOrder[a.level] ?? 0; vb = levelOrder[b.level] ?? 0; break;
+              case 'mcTags':
+                va = a.mcTags.join('|'); vb = b.mcTags.join('|'); break;
+              default:
+                va = a.name; vb = b.name; break;
+            }
+            if (va < vb) return this.sortAsc ? -1 : 1;
+            if (va > vb) return this.sortAsc ? 1 : -1;
+            return 0;
+          });
+
+          return arr;
+        },
+        groupedItems() {
+          const groups = {};
+          const tierNames = { 1: 'Normal', 2: 'Exceptional', 3: 'Elite' };
+          const tierOrder = [3, 2, 1]; // Elite, Exceptional, Normal
+          
+          this.filteredAndSortedItems.forEach(item => {
+            const groupKey = tierNames[item.tier] || 'Unknown';
+            if (!groups[groupKey]) {
+              groups[groupKey] = [];
+            }
+            groups[groupKey].push(item);
+          });
+          
+          // Return groups in specific order
+          const orderedGroups = {};
+          tierOrder.forEach(tier => {
+            const key = tierNames[tier];
+            if (groups[key]) {
+              orderedGroups[key] = groups[key];
+            }
+          });
+          
+          return orderedGroups;
+        },
+        filteredAndSortedMaps() {
+          let arr = this.maps.filter(map => {
+            const s = this.mapFilters.search.trim().toLowerCase();
+            const matchesSearch = s === '' || map.name.toLowerCase().includes(s) || map.code.toLowerCase().includes(s);
+
+            const matchesTier = this.mapFilters.tier === 'all' || map.tier === parseInt(this.mapFilters.tier);
+
+            const matchesLevel = this.mapFilters.level === 'all' || map.level === this.mapFilters.level;
+
+            return matchesSearch && matchesTier && matchesLevel;
+          });
+
+          // Sort maps alphabetically by name by default
+          arr.sort((a, b) => a.name.localeCompare(b.name));
+          
+          return arr;
+        },
+        groupedMaps() {
+          const groups = {};
+          const tierNames = { 1: 'T1', 2: 'T2', 3: 'T3' };
+          const tierOrder = [1, 2, 3]; // T1, T2, T3
+          
+          this.filteredAndSortedMaps.forEach(map => {
+            const groupKey = tierNames[map.tier] || 'Unknown';
+            if (!groups[groupKey]) {
+              groups[groupKey] = [];
+            }
+            groups[groupKey].push(map);
+          });
+          
+          // Return groups in specific order
+          const orderedGroups = {};
+          tierOrder.forEach(tier => {
+            const key = tierNames[tier];
+            if (groups[key]) {
+              orderedGroups[key] = groups[key];
+            }
+          });
+          
+          return orderedGroups;
+        }
+      },
+      methods: {
+        toggleNameDisplay() {
+          this.nameDisplayMode = this.nameDisplayMode === 'short' ? 'filter' : 'short';
+          localStorage.setItem('nameDisplayMode', this.nameDisplayMode);
+        },
+        escapeHtml(str = '') {
+          const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+          return String(str ?? '').replace(/[&<>"']/g, ch => map[ch] || ch);
+        },
+        renderBracket(cls, symbolHtml) {
+          return `<span class="filter-bracket ${cls}">${symbolHtml}</span>`;
+        },
+        buildFilterName(item) {
+          const safeName = `<span class="${item.isUnique ? 'name-unique' : 'name-set'}">${this.escapeHtml(item.name)}</span>`;
+          let content = safeName;
+
+          if (item.level === 'Mid') {
+            content = `${this.renderBracket('filter-bracket-mid', '&gt;&gt;')}${content}${this.renderBracket('filter-bracket-mid', '&lt;&lt;')}`;
+          } else if (item.level === 'God') {
+            content = `${this.renderBracket('filter-bracket-god', '&gt;&gt;')}${content}${this.renderBracket('filter-bracket-god', '&lt;&lt;')}`;
+          }
+
+          if (item.mightCorrupt) {
+            content = `${this.renderBracket('filter-bracket-mc', '&gt;')}${content}${this.renderBracket('filter-bracket-mc', '&lt;')}<span class="filter-mc-suffix">+mc</span>`;
+          }
+
+          return content;
+        },
+        renderedName(item) {
+          return this.nameDisplayMode === 'filter'
+            ? this.buildFilterName(item)
+            : this.escapeHtml(item.name);
+        },
+        nameCellClass(item) {
+          return this.nameDisplayMode === 'filter'
+            ? 'name-filter-cell'
+            : (item.isUnique ? 'name-unique' : 'name-set');
+        },
+        buildMapFilterName(map) {
+          let content = '';
+          
+          // Add map name (tier styling handled in Tier column)
+          const nameClass = 'name-map';
+          content += `<span class="${nameClass}">${this.escapeHtml(map.name)}</span>`;
+          
+          // Add level suffix
+          if (map.level === 'Low') {
+            content += ` <span class="map-level-low">(¼)</span>`;
+          } else if (map.level === 'Mid') {
+            content += ` <span class="map-level-mid">(½)</span>`;
+          } else if (map.level === 'God') {
+            content += ` <span class="map-level-god">(¾)</span>`;
+          }
+          
+          return content;
+        },
+        renderedMapName(map) {
+          return this.nameDisplayMode === 'filter'
+            ? this.buildMapFilterName(map)
+            : this.escapeHtml(map.name);
+        },
+        renderedMapTier(map) {
+          if (this.nameDisplayMode === 'filter') {
+            if (map.tier === 1) {
+              return `<span class="map-tier-white">T${map.tier}</span>`;
+            } else if (map.tier === 2) {
+              return `<span class="map-tier-blue">° T${map.tier} °</span>`;
+            } else if (map.tier === 3) {
+              return `<span class="map-tier-yellow">°° T${map.tier} °°</span>`;
+            }
+          }
+          return this.escapeHtml('T' + map.tier);
+        },
+        mapNameCellClass(map) {
+          return this.nameDisplayMode === 'filter'
+            ? 'map-filter-cell'
+            : 'name-map';
+        },
+        computeAliasData() {
+          const uniq = (arr) => [...new Set(arr)].sort();
+          const lowUnique = uniq(this.items.filter(i => i.level === 'Low' && i.isUnique === true).map(i => i.code));
+          const lowSet    = uniq(this.items.filter(i => i.level === 'Low' && i.isUnique === false).map(i => i.code));
+          const midUnique = uniq(this.items.filter(i => i.level === 'Mid' && i.isUnique === true).map(i => i.code));
+          const midSet    = uniq(this.items.filter(i => i.level === 'Mid' && i.isUnique === false).map(i => i.code));
+          const god       = uniq(this.items.filter(i => i.level === 'God').map(i => i.code));
+          return { lowUnique, lowSet, midUnique, midSet, god };
+        },
+        computeMapAliasData() {
+          const uniq = (arr) => [...new Set(arr)].sort();
+          const mapLiked  = uniq(this.maps.filter(m => m.level === 'God').map(m => m.code));
+          const mapMedium = uniq(this.maps.filter(m => m.level === 'Mid').map(m => m.code));
+          const mapHate   = uniq(this.maps.filter(m => m.level === 'Low').map(m => m.code));
+          return { mapLiked, mapMedium, mapHate };
+        },
+        aliasStringFromData(data) {
+          return [
+            `Alias[LOWUNIQUE]: UNI (${data.lowUnique.join(' OR ')})`,
+            `Alias[LOWSET]: SET (${data.lowSet.join(' OR ')})`,
+            `Alias[MIDUNIQUE]: UNI (${data.midUnique.join(' OR ')})`,
+            `Alias[MIDSET]: SET (${data.midSet.join(' OR ')})`,
+            `Alias[GOD]: (UNI OR SET) (${data.god.join(' OR ')})`
+          ].join('\n');
+        },
+        mapAliasStringFromData(data) {
+          return [
+            `Alias[MAPLIKED]: (${data.mapLiked.join(' OR ')})`,
+            `Alias[MAPMEDIUM]: (${data.mapMedium.join(' OR ')})`,
+            `Alias[MAPHATE]: (${data.mapHate.join(' OR ')})`
+          ].join('\n');
+        },
+        mapAliasLinesFromData(data) {
+          const join = (codes) => codes.join(' OR ');
+          return {
+            MAPLIKED: `Alias[MAPLIKED]: (${join(data.mapLiked)})`,
+            MAPMEDIUM: `Alias[MAPMEDIUM]: (${join(data.mapMedium)})`,
+            MAPHATE: `Alias[MAPHATE]: (${join(data.mapHate)})`
+          };
+        },
+        aliasLinesFromData(data) {
+          const join = (codes) => codes.join(' OR ');
+          return {
+            LOWUNIQUE: `Alias[LOWUNIQUE]: UNI (${join(data.lowUnique)})`,
+            LOWSET:    `Alias[LOWSET]: SET (${join(data.lowSet)})`,
+            MIDUNIQUE: `Alias[MIDUNIQUE]: UNI (${join(data.midUnique)})`,
+            MIDSET:    `Alias[MIDSET]: SET (${join(data.midSet)})`,
+            GOD:       `Alias[GOD]: (SET OR UNI) (${join(data.god)})`
+          };
+        },
+        // Encode string into Windows-1252 bytes (ANSI) for file writes
+        encodeWin1252(str) {
+          const specialMap = {
+            0x20AC: 0x80, 0x201A: 0x82, 0x0192: 0x83, 0x201E: 0x84, 0x2026: 0x85,
+            0x2020: 0x86, 0x2021: 0x87, 0x02C6: 0x88, 0x2030: 0x89, 0x0160: 0x8A,
+            0x2039: 0x8B, 0x0152: 0x8C, 0x017D: 0x8E, 0x2018: 0x91, 0x2019: 0x92,
+            0x201C: 0x93, 0x201D: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97,
+            0x02DC: 0x98, 0x2122: 0x99, 0x0161: 0x9A, 0x203A: 0x9B, 0x0153: 0x9C,
+            0x017E: 0x9E, 0x0178: 0x9F
+          };
+          const bytes = [];
+          for (const ch of str) {
+            const code = ch.codePointAt(0);
+            if (code === undefined) continue;
+            if (code <= 0xFF) {
+              bytes.push(code);
+            } else if (specialMap[code] !== undefined) {
+              bytes.push(specialMap[code]);
+            } else {
+              bytes.push(0x3F); // '?'
+            }
+          }
+          return new Uint8Array(bytes);
+        },
+        // --- IndexedDB helpers to persist FS handles ---
+        async idbOpen() {
+          return await new Promise((resolve, reject) => {
+            const req = indexedDB.open('orzel-fs', 1);
+            req.onupgradeneeded = () => {
+              const db = req.result;
+              if (!db.objectStoreNames.contains('handles')) {
+                db.createObjectStore('handles', { keyPath: 'key' });
+              }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          });
+        },
+        async idbPut(key, handle) {
+          try {
+            const db = await this.idbOpen();
+            await new Promise((resolve, reject) => {
+              const tx = db.transaction('handles', 'readwrite');
+              tx.objectStore('handles').put({ key, handle });
+              tx.oncomplete = () => resolve();
+              tx.onerror = () => reject(tx.error);
+            });
+          } catch (e) { console.warn('idbPut failed', e); }
+        },
+        async idbGet(key) {
+          try {
+            const db = await this.idbOpen();
+            return await new Promise((resolve, reject) => {
+              const tx = db.transaction('handles', 'readonly');
+              const req = tx.objectStore('handles').get(key);
+              req.onsuccess = () => resolve(req.result?.handle || null);
+              req.onerror = () => reject(req.error);
+            });
+          } catch (e) { console.warn('idbGet failed', e); return null; }
+        },
+        async ensurePermission(handle, mode = 'readwrite') {
+          try {
+            if (!handle) return false;
+            const opts = { mode };
+            const q = await handle.queryPermission?.(opts);
+            if (q === 'granted') return true;
+            const r = await handle.requestPermission?.(opts);
+            return r === 'granted';
+          } catch { return false; }
+        },
+        async restoreHandles() {
+          // Try load saved dir + file handles and request permission
+          const dir = await this.idbGet('dir');
+          if (dir && await this.ensurePermission(dir, 'readwrite')) {
+            this.dirHandle = dir;
+          }
+          const file = await this.idbGet('file');
+          if (file && await this.ensurePermission(file, 'readwrite')) {
+            this.filterFileHandle = file;
+          }
+        },
+        async locateOrzelFilter() {
+          // Use file picker to locate orzel.filter anywhere on disk
+          if (!window.showOpenFilePicker) {
+            console.warn('File picker not supported');
+            showNotification('File picker not supported in this browser', 'error');
+            return;
+          }
+          try {
+            const [fh] = await window.showOpenFilePicker({
+              multiple: false,
+              types: [{ description: 'Orzel Filter', accept: { 'text/plain': ['.filter'] } }],
+              startIn: this.dirHandle || 'documents'
+            });
+            if (fh && await this.ensurePermission(fh, 'readwrite')) {
+              this.filterFileHandle = fh;
+              await this.idbPut('file', fh);
+              console.log('Located orzel.filter');
+              showNotification('Working directory set successfully', 'info');
+            }
+          } catch (e) {
+            console.warn('locateOrzelFilter:', e);
+            if (e.name !== 'AbortError') {
+              showNotification('Failed to set working directory: ' + e.message, 'error');
+            }
+          }
+        },
+        async getOrEnsureDirectory() {
+          // Try to use existing dirHandle, otherwise ask user to grant directory access
+          if (this.dirHandle && await this.ensurePermission(this.dirHandle, 'readwrite')) {
+            return this.dirHandle;
+          }
+          
+          // Ask user to grant directory access (they just located orzel.filter, so can easily pick the folder)
+          if (!window.showDirectoryPicker) return null;
+          try {
+            const dirHandle = await window.showDirectoryPicker({ 
+              mode: 'readwrite',
+              startIn: this.dirHandle || 'documents'
+            });
+            if (dirHandle && await this.ensurePermission(dirHandle, 'readwrite')) {
+              this.dirHandle = dirHandle;
+              await this.idbPut('dir', dirHandle);
+              return dirHandle;
+            }
+          } catch (e) {
+            console.warn('getOrEnsureDirectory:', e);
+          }
+          return null;
+        },
+        async selectWorkingFolder() {
+          // New behavior: locate orzel.filter file to set working location
+          await this.locateOrzelFilter();
+        },
+        async pickFilterFile(startInHandle) {
+          if (!window.showOpenFilePicker) return null;
+          try {
+            const [fh] = await window.showOpenFilePicker({
+              multiple: false,
+              startIn: startInHandle || this.dirHandle || 'documents',
+              types: [{ description: 'Filter', accept: { 'text/plain': ['.filter'] } }]
+            });
+            if (fh && await this.ensurePermission(fh, 'readwrite')) {
+              this.filterFileHandle = fh;
+              await this.idbPut('file', fh);
+              return fh;
+            }
+          } catch (e) { console.warn('pickFilterFile:', e); }
+          return null;
+        },
+        async pickAndLoadFile() {
+          // Open file picker and load the selected file
+          const fh = await this.pickFilterFile(this.dirHandle);
+          if (!fh) return;
+          try {
+            const file = await fh.getFile();
+            const buffer = await file.arrayBuffer();
+            const decoder = new TextDecoder('windows-1252');
+            const text = decoder.decode(buffer);
+            this.importedFileName = file.name;
+            this.importedRawContent = text;
+            this.interpretImportedFile(text, file.name);
+            showNotification('File loaded successfully: ' + file.name, 'success');
+          } catch (e) {
+            console.warn('pickAndLoadFile failed:', e);
+            showNotification('Failed to load file: ' + e.message, 'error');
+          }
+        },
+        async triggerLoad() {
+          if (this.dirHandle && await this.ensurePermission(this.dirHandle, 'read')) {
+            try {
+              const fh = await this.dirHandle.getFileHandle('orzel.filter');
+              if (fh) {
+                this.filterFileHandle = fh;
+                await this.idbPut('file', fh);
+                const file = await fh.getFile();
+                const buffer = await file.arrayBuffer();
+                const decoder = new TextDecoder('windows-1252');
+                const text = decoder.decode(buffer);
+                this.importedFileName = file.name;
+                this.importedRawContent = text;
+                this.interpretImportedFile(text, file.name);
+                showNotification('File loaded successfully: ' + file.name, 'success');
+                return;
+              }
+            } catch (e) {
+              showNotification('Failed to load orzel.filter: ' + e.message, 'error');
+            }
+          }
+
+          // Fallback: show standard file input picker
+          this.$refs.fileInput?.click();
+        },
+        handleFileSelected(event) {
+          const file = event?.target?.files?.[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const text = e.target?.result?.toString() ?? '';
+            this.importedFileName = file.name;
+            this.importedRawContent = text;
+            this.interpretImportedFile(text, file.name);
+            showNotification('File loaded successfully: ' + file.name, 'success');
+          };
+          reader.onerror = (e) => {
+            showNotification('Failed to read file: ' + file.name, 'error');
+          };
+          reader.readAsText(file, 'windows-1252');
+
+          // Allow selecting the same file again later
+          event.target.value = '';
+        },
+        interpretImportedFile(rawText, filename) {
+          // Reverse-engineer levels from alias lines and apply to items
+          this.pendingImport = rawText;
+
+          if (!rawText || rawText.trim().length === 0) {
+            showNotification('File is empty or invalid', 'error');
+            return;
+          }
+
+          const lines = rawText.split(/\r?\n/);
+
+          // Storage for parsed codes by level + rarity
+          const parsed = {
+            Low: { uni: new Set(), set: new Set() },
+            Mid: { uni: new Set(), set: new Set() },
+            God: { uni: new Set(), set: new Set(), all: new Set() }
+          };
+
+          // Storage for parsed map levels by code
+          const parsedMaps = {
+            MapLiked: new Set(),
+            MapMedium: new Set(),
+            MapHate: new Set()
+          };
+
+          // Storage for parsed might-corrupt data keyed by rarity+code
+          const parsedMC = {};
+          const mcKey = (code, isUni) => `${isUni ? 'uni' : 'set'}:${code}`;
+
+          const aliasLineRegex = /^\s*Alias\[(LOWUNIQUE|LOWSET|MIDUNIQUE|MIDSET|GOD|MAPLIKED|MAPMEDIUM|MAPHATE)\]\s*:/i;
+
+          for (const line of lines) {
+            const m = line.match(aliasLineRegex);
+            if (!m) continue;
+            const alias = m[1].toUpperCase();
+
+            // Get text after the colon and capture all (...) groups
+            const after = line.slice(m[0].length).trim();
+            const parenRegex = /\(([^)]*)\)/g;
+            const groups = [];
+            let gm;
+            while ((gm = parenRegex.exec(after)) !== null) {
+              groups.push(gm[1]);
+            }
+            if (groups.length === 0) continue;
+
+            // Choose the group that contains codes:
+            // - For GOD lines like "(SET OR UNI) (ulc)", use the last group
+            // - For LOW/MID lines like "UNI (codes)", also use the last group
+            // - For MAP aliases like "(t14 OR t15 ...)", use the only/last group
+            const codesStr = groups[groups.length - 1];
+
+            // Extract codes separated by 'OR' and/or commas
+            const rawCodes = codesStr
+              .split(/\s+OR\s+|\s*,\s*/i)
+              .map(s => s.trim())
+              .filter(Boolean);
+
+            const addCodes = (targetSet, codes) => {
+              for (const c of codes) targetSet.add(c.toLowerCase());
+            };
+
+            if (alias === 'LOWUNIQUE') {
+              addCodes(parsed.Low.uni, rawCodes);
+            } else if (alias === 'LOWSET') {
+              addCodes(parsed.Low.set, rawCodes);
+            } else if (alias === 'MIDUNIQUE') {
+              addCodes(parsed.Mid.uni, rawCodes);
+            } else if (alias === 'MIDSET') {
+              addCodes(parsed.Mid.set, rawCodes);
+            } else if (alias === 'GOD') {
+              // God level applies to both set and unique
+              addCodes(parsed.God.all, rawCodes);
+            } else if (alias === 'MAPLIKED') {
+              addCodes(parsedMaps.MapLiked, rawCodes);
+            } else if (alias === 'MAPMEDIUM') {
+              addCodes(parsedMaps.MapMedium, rawCodes);
+            } else if (alias === 'MAPHATE') {
+              addCodes(parsedMaps.MapHate, rawCodes);
+            }
+          }
+
+          // Parse Might Corrupt section to restore flags and tags
+          const mcStartMarker = "//***---------------------------------- Might Corrupts ------------------------------------***//";
+          const mcEndMarker = "//**********************************************************************************************************************************//";
+          const mcStartIdx = rawText.indexOf(mcStartMarker);
+          if (mcStartIdx !== -1) {
+            const mcAfterStart = mcStartIdx + mcStartMarker.length;
+            const mcEndIdx = rawText.indexOf(mcEndMarker, mcAfterStart);
+            const mcChunk = mcEndIdx === -1 ? rawText.slice(mcAfterStart) : rawText.slice(mcAfterStart, mcEndIdx);
+            const mcLines = mcChunk.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            const displayRegex = /^ItemDisplay\[[^\]]*(UNI|SET)\s+(ID|!ID)\s+([^\]\s]+)\]\s*:\s*(.*)$/i;
+            mcLines.forEach(line => {
+              const match = line.match(displayRegex);
+              if (!match) return;
+              const rarity = match[1].toLowerCase() === 'uni';
+              const code = match[3].toLowerCase();
+              const rest = match[4];
+              const key = mcKey(code, rarity);
+              const entry = parsedMC[key] || { mightCorrupt: false, tags: [] };
+              const restLower = rest.toLowerCase();
+              // Only set the flag when explicit 'might corrupt' markers exist
+              // Presence of 'MC:' tags alone should NOT toggle mightCorrupt
+              if (rest.includes('+mc') || restLower.includes('might corrupt')) {
+                entry.mightCorrupt = true;
+              }
+              const tagMatch = rest.match(/MC:\s*([^}]+)/i);
+              if (tagMatch) {
+                entry.tags = tagMatch[1].split('|').map(t => t.trim()).filter(Boolean);
+              }
+              parsedMC[key] = entry;
+            });
+          }
+
+          // Apply to items with precedence: God > Mid > Low
+          let changedLow = 0, changedMid = 0, changedGod = 0;
+          for (const item of this.items) {
+            const code = (item.code || '').toLowerCase();
+            const isUni = item.isUnique === true;
+
+            const inGod = parsed.God.all.has(code);
+            const inMid = isUni ? parsed.Mid.uni.has(code) : parsed.Mid.set.has(code);
+            const inLow = isUni ? parsed.Low.uni.has(code) : parsed.Low.set.has(code);
+
+            if (inGod) {
+              if (item.level !== 'God') changedGod++;
+              item.level = 'God';
+            } else if (inMid) {
+              if (item.level !== 'Mid') changedMid++;
+              item.level = 'Mid';
+            } else if (inLow) {
+              if (item.level !== 'Low') changedLow++;
+              item.level = 'Low';
+            } else {
+              // Unmatched: leave as-is
+            }
+          }
+
+          // Apply map levels with precedence: MapLiked (God) > MapMedium (Mid) > MapHate (Low)
+          let changedMapLiked = 0, changedMapMedium = 0, changedMapHate = 0;
+          for (const map of this.maps) {
+            const code = (map.code || '').toLowerCase();
+
+            const inMapHate = parsedMaps.MapHate.has(code);
+            const inMapMedium = parsedMaps.MapMedium.has(code);
+            const inMapLiked = parsedMaps.MapLiked.has(code);
+
+            if (inMapLiked) {
+              if (map.level !== 'God') changedMapLiked++;
+              map.level = 'God';
+            } else if (inMapMedium) {
+              if (map.level !== 'Mid') changedMapMedium++;
+              map.level = 'Mid';
+            } else if (inMapHate) {
+              if (map.level !== 'Low') changedMapHate++;
+              map.level = 'Low';
+            } else {
+              // Unmatched: leave as-is
+            }
+          }
+
+          // Apply might-corrupt flags and tags sourced from the file
+          let changedMC = 0;
+          for (const item of this.items) {
+            const key = mcKey((item.code || '').toLowerCase(), item.isUnique === true);
+            const info = parsedMC[key] || { mightCorrupt: false, tags: [] };
+            const tags = info.tags || [];
+            const tagsChanged = JSON.stringify(item.mcTags || []) !== JSON.stringify(tags);
+            if (item.mightCorrupt !== info.mightCorrupt || tagsChanged) changedMC++;
+            item.mightCorrupt = info.mightCorrupt === true;
+            item.mcTags = [...tags];
+          }
+
+          console.log(`[Load] ${filename}: Levels set — God:${changedGod}, Mid:${changedMid}, Low:${changedLow}; Maps — MapHate:${changedMapHate}, MapMedium:${changedMapMedium}, MapLiked:${changedMapLiked}; MightCorrupt:${changedMC}`);
+        },
+        buildAliasesFromGrid() {
+          const uniqCodes = (arr) => [...new Set(arr)].sort();
+          const lowUnique = uniqCodes(this.items.filter(i => i.level === 'Low' && i.isUnique === true).map(i => i.code));
+          const lowSet    = uniqCodes(this.items.filter(i => i.level === 'Low' && i.isUnique === false).map(i => i.code));
+          const midUnique = uniqCodes(this.items.filter(i => i.level === 'Mid' && i.isUnique === true).map(i => i.code));
+          const midSet    = uniqCodes(this.items.filter(i => i.level === 'Mid' && i.isUnique === false).map(i => i.code));
+          const godAll    = uniqCodes(this.items.filter(i => i.level === 'God').map(i => i.code));
+
+          const join = (codes) => codes.join(' OR ');
+
+          return {
+            LOWUNIQUE: `Alias[LOWUNIQUE]: UNI (${join(lowUnique)})`,
+            LOWSET:    `Alias[LOWSET]: SET (${join(lowSet)})`,
+            MIDUNIQUE: `Alias[MIDUNIQUE]: UNI (${join(midUnique)})`,
+            MIDSET:    `Alias[MIDSET]: SET (${join(midSet)})`,
+            GOD:       `Alias[GOD]: (SET OR UNI) (${join(godAll)})`
+          };
+        },
+        updateFilterContentWithAliases(content, aliasLines) {
+          const lines = content.split(/\r?\n/);
+          const aliasNameRegex = /^\s*Alias\[(LOWUNIQUE|LOWSET|MIDUNIQUE|MIDSET|GOD)\]\s*:/i;
+          const updated = lines.map(line => {
+            const m = line.match(aliasNameRegex);
+            if (!m) return line;
+            const key = m[1].toUpperCase();
+            // Replace entire line with our generated alias line
+            return aliasLines[key] ?? line;
+          });
+          return updated.join('\n');
+        },
+        updateFilterContentWithMapAliases(content, mapAliasLines) {
+          const lines = content.split(/\r?\n/);
+          const aliasNameRegex = /^\s*Alias\[(MAPLIKED|MAPMEDIUM|MAPHATE)\]\s*:/i;
+          const updated = lines.map(line => {
+            const m = line.match(aliasNameRegex);
+            if (!m) return line;
+            const key = m[1].toUpperCase();
+            // Replace entire line with our generated alias line
+            return mapAliasLines[key] ?? line;
+          });
+          return updated.join('\n');
+        },
+        buildMightCorruptOutputString() {
+          const buildColoredItem = (item) => {
+            let colored = (item.isUnique ? '%GOLD%' : '%GREEN%') + item.name.replace(" (new)", "");
+            if (item.level === 'Mid') colored = '%YELLOW%>>' + colored + '%YELLOW%<<';
+            else if (item.level === 'God') colored = '%PURPLE%>>' + colored + '%PURPLE%<<';
+            if (item.mightCorrupt) colored = '%RED%> ' + colored + '%RED% <';
+            return colored;
+          };
+          const buildMapDotItem = (item) => {
+            let dot = '';
+            if(item.isUnique){
+              if (item.level == 'Low') dot+= '%MAP-6C%';
+              else if (item.level == 'Mid') dot+= '%DOT-6C%';
+              else if (item.level == 'God') dot+= '%BORDER-6C%';
+            }
+            else if(item.isUnique == false){
+              if (!item.mightCorrupt && item.level != 'God') dot+= '%DOT-84%'; else dot+= '%MAP-84%';
+            }
+            if (item.level == 'God') dot+= '%DOT-9B%';
+            if (item.mightCorrupt) dot+= '%PX-55%';
+            return dot;
+          };
+          const sorted = [...this.items].sort((a, b) => a.name.localeCompare(b.name));
+          const lines = [];
+          sorted.forEach(item => {
+            const colored = buildColoredItem(item);
+            const mapDot = buildMapDotItem(item);
+            const baseParts = [];
+            baseParts.push('ItemDisplay[');
+            if (item.level !== 'God') baseParts.push('FILTLVL<12 ');
+            baseParts.push(item.isUnique ? 'UNI ' : 'SET ');
+            baseParts.push('!ID ');
+            baseParts.push(item.code);
+            baseParts.push(']: ');
+            baseParts.push(colored);
+            if (item.mightCorrupt) baseParts.push('%GRAY% +mc');
+            baseParts.push(mapDot);
+            baseParts.push(' //' + item.name);
+            lines.push(baseParts.join(''));
+            if (item.mightCorrupt || item.mcTags.length > 0) {
+              const dupParts = [];
+              dupParts.push('ItemDisplay[');
+              if (item.level !== 'God') dupParts.push('FILTLVL<12 ');
+              dupParts.push(item.isUnique ? 'UNI ' : 'SET ');
+              dupParts.push('STAT360=0 ');
+              dupParts.push(item.code);
+              dupParts.push(']: ');
+              dupParts.push(colored);
+              if(item.mightCorrupt) dupParts.push('%NL%%RED%× might corrupt ×');
+              dupParts.push(mapDot);
+              const joinedTags = (item.mcTags || []).join(' | ');
+              dupParts.push(`{%NAME%%NL%%RED%MC: ${joinedTags}}`);
+              dupParts.push(' //' + item.name);
+              lines.push(dupParts.join(''));
+            }
+          });
+          return lines.join('\n');
+        },
+        updateFilterContentWithMightList(content, listString) {
+          const startMarker = "//***---------------------------------- Might Corrupts ------------------------------------***//";
+          const endMarker = "//**********************************************************************************************************************************//";
+          const startIdx = content.indexOf(startMarker);
+          if (startIdx === -1) return content;
+          const afterStart = startIdx + startMarker.length;
+          const endIdx = content.indexOf(endMarker, afterStart);
+          if (endIdx === -1) return content;
+          const before = content.slice(0, afterStart);
+          const after = content.slice(endIdx);
+          const middle = '\n' + listString + '\n';
+          return before + middle + after;
+        },
+        async triggerSave() {
+          const aliasData = this.computeAliasData();
+          const aliasLines = this.aliasLinesFromData(aliasData);
+          const mapAliasData = this.computeMapAliasData();
+          const mapAliasLines = this.mapAliasLinesFromData(mapAliasData);
+
+          // Helper: download text as file (fallback) using Windows-1252 bytes
+          const downloadText = (text, name) => {
+            const bytes = this.encodeWin1252(text);
+            const blob = new Blob([bytes], { type: 'text/plain;charset=windows-1252' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            a.click();
+            URL.revokeObjectURL(url);
+          };
+
+          const ts = new Date();
+          const pad = (n) => String(n).padStart(2, '0');
+          const timestamp = `${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}${pad(ts.getSeconds())}`;
+          const backupName = `orzel-backup_${timestamp}.filter`;
+
+          // Try File System Access API path
+          try {
+            // Get or ensure directory handle
+            const dirHandle = await this.getOrEnsureDirectory();
+            if (!dirHandle) throw new Error('No directory access granted');
+
+            // Get or pick file handle
+            let fileHandle = this.filterFileHandle;
+            if (!fileHandle) {
+              try { fileHandle = await dirHandle.getFileHandle('orzel.filter'); }
+              catch { /* not found */ }
+            }
+            if (!fileHandle) {
+              // Ask user to pick the file
+              fileHandle = await this.pickFilterFile(dirHandle);
+              if (!fileHandle) throw new Error('File selection cancelled');
+            }
+            this.filterFileHandle = fileHandle;
+            await this.idbPut('file', fileHandle);
+
+            const originalFile = await fileHandle.getFile();
+            const buffer = await originalFile.arrayBuffer();
+            const decoder = new TextDecoder('windows-1252');
+            const originalText = decoder.decode(buffer);
+
+            // Backup into same directory
+            const backupHandle = await dirHandle.getFileHandle(backupName, { create: true });
+            const backupWritable = await backupHandle.createWritable();
+            const originalBytes = this.encodeWin1252(originalText);
+            await backupWritable.write(originalBytes);
+            await backupWritable.close();
+
+            // Prepare updated content by replacing alias lines and might-corrupts list
+            const withAliases = this.updateFilterContentWithAliases(originalText, aliasLines);
+            const withMapAliases = this.updateFilterContentWithMapAliases(withAliases, mapAliasLines);
+            const mcList = this.buildMightCorruptOutputString();
+            const updatedText = this.updateFilterContentWithMightList(withMapAliases, mcList);
+
+            // Write into orzel.filter in the same directory
+            const targetHandle = await dirHandle.getFileHandle('orzel.filter', { create: true });
+            const writable = await targetHandle.createWritable();
+            const updatedBytes = this.encodeWin1252(updatedText);
+            await writable.write(updatedBytes);
+            await writable.close();
+
+            console.log(`[Save] Wrote ${'orzel.filter'} and backup ${backupName}`);
+            showNotification('File saved successfully with backup: ' + backupName, 'success');
+            return;
+          } catch (err) {
+            console.warn('FS save fallback:', err);
+            showNotification('Failed to save using file system access: ' + err.message, 'warning');
+          }
+
+          // Fallback: if we have importedRawContent, update and download; otherwise just synthesize file
+          const baseText = this.importedRawContent || '';
+          const withAliases = baseText
+            ? this.updateFilterContentWithAliases(baseText, aliasLines)
+            : Object.values(aliasLines).join('\n');
+          const withMapAliases = baseText
+            ? this.updateFilterContentWithMapAliases(withAliases, mapAliasLines)
+            : withAliases + '\n' + Object.values(mapAliasLines).join('\n');
+          const mcList = this.buildMightCorruptOutputString();
+          const updatedText = baseText ? this.updateFilterContentWithMightList(withMapAliases, mcList) : withMapAliases;
+
+          // Offer backup of original if we had it
+          if (baseText) downloadText(baseText, backupName);
+          downloadText(updatedText, 'orzel.filter');
+          showNotification('Files downloaded (fallback mode)', 'info');
+        },
+        toggleDarkMode() {
+          this.darkMode = !this.darkMode;
+          localStorage.setItem('darkMode', this.darkMode);
+          document.body.classList.toggle('dark-mode', this.darkMode);
+        },
+        startEditCorrupt(item) {
+          this.tempMcTags[item.id] = [...(item.mcTags || [])];
+        },
+        saveEditCorrupt(item, evt) {
+          const edited = this.tempMcTags[item.id] || [];
+          item.mcTags = [...edited];
+          // Close the dropdown if possible
+          try {
+            const dropdownRoot = evt.target.closest('.dropdown');
+            const toggleEl = dropdownRoot?.querySelector('[data-bs-toggle="dropdown"]');
+            if (toggleEl) {
+              const dd = bootstrap.Dropdown.getOrCreateInstance(toggleEl);
+              dd.hide();
+            }
+          } catch {}
+        },
+        cancelEditCorrupt(item, evt) {
+          delete this.tempMcTags[item.id];
+          try {
+            const dropdownRoot = evt.target.closest('.dropdown');
+            const toggleEl = dropdownRoot?.querySelector('[data-bs-toggle="dropdown"]');
+            if (toggleEl) {
+              const dd = bootstrap.Dropdown.getOrCreateInstance(toggleEl);
+              dd.hide();
+            }
+          } catch {}
+        },
+        confirmReset() {
+          if (confirm('All local changes will be lost. Default information will be restored based on Orzel Loot Filter. Continue?')) {
+            this.resetAll();
+          }
+        },
+        setSort(key) {
+          if (this.sortKey === key) {
+            this.sortAsc = !this.sortAsc;
+          } else {
+            this.sortKey = key;
+            this.sortAsc = true;
+          }
+        },
+        resetAll() {
+          this.items = this.defaultItems.map(it => ({
+            id: it.id,
+            isUnique: it.isUnique,
+            isArmor: it.isArmor,
+            mightCorrupt: it.mightCorrupt,
+            code: it.code,
+            name: it.name,
+            level: it.level,
+            mcTags: [...it.mcTags],
+            craft: it.craft,
+            tier: it.tier
+          }));
+        },
+        clearAllFilters() {
+          if (this.activeTab === 'maps') {
+            this.mapFilters.search = '';
+            this.mapFilters.tier = 'all';
+            this.mapFilters.level = 'all';
+          } else {
+            // For items and crafters tabs
+            this.filters.search = '';
+            this.filters.unique = 'all';
+            this.filters.isArmor = 'all';
+            this.filters.mc = 'all';
+            this.filters.craft = 'all';
+            this.filters.level = 'all';
+            this.filters.tags = [];
+          }
+        },
+        exportAll() {
+          const dataStr = JSON.stringify(this.items, null, 2);
+          this.downloadJson(dataStr, 'items-all.json');
+        },
+        exportLevels() {
+          const output = this.aliasStringFromData(this.computeAliasData());
+          
+          // Create and show modal dialog
+          this.showExportModal(output);
+        },
+        showExportModal(content) {
+          // Create modal HTML
+          const modalHtml = `
+            <div class="modal fade" id="exportModal" tabindex="-1">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Export Aliases</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                      <strong>Copy the text below to use in your configuration:</strong>
+                    </div>
+                    <textarea id="exportContent" class="form-control" rows="8" readonly style="font-family: monospace; font-size: 0.95rem;"></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="copyBtn">
+                      📋 Copy to Clipboard
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // Remove existing modal if any
+          const existingModal = document.getElementById('exportModal');
+          if (existingModal) {
+            existingModal.remove();
+          }
+          
+          // Add modal to DOM
+          document.body.insertAdjacentHTML('beforeend', modalHtml);
+          
+          // Set content
+          document.getElementById('exportContent').value = content;
+          
+          // Add copy button event listener
+          const copyBtn = document.getElementById('copyBtn');
+          copyBtn.addEventListener('click', function() {
+            const textarea = document.getElementById('exportContent');
+            textarea.select();
+            document.execCommand('copy');
+            
+            // Show feedback
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '✓ Copied!';
+            copyBtn.disabled = true;
+            setTimeout(() => {
+              copyBtn.innerHTML = originalText;
+              copyBtn.disabled = false;
+            }, 2000);
+          });
+          
+          // Show modal
+          const modal = new bootstrap.Modal(document.getElementById('exportModal'));
+          modal.show();
+          
+          // Clean up modal when hidden
+          document.getElementById('exportModal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+          });
+        },
+        exportMightCorrupt() {
+          this.showExportModal(this.buildMightCorruptOutputString());
+        },
+        exportMapLevels() {
+          const output = this.mapAliasStringFromData(this.computeMapAliasData());
+          this.showExportModal(output);
+        },
+        downloadJson(dataStr, filename) {
+          const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+          const exportFileDefaultName = filename;
+          const linkElement = document.createElement('a');
+          linkElement.setAttribute('href', dataUri);
+          linkElement.setAttribute('download', exportFileDefaultName);
+          linkElement.click();
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

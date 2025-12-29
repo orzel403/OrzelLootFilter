@@ -1,4 +1,4 @@
-# Orzel’s Loot Filter  
+# Orzel Loot Filter  
 
    * [1. Overview](#1-overview)
    * [2. Design Goals](#2-design-goals)
@@ -58,7 +58,24 @@ In short: fewer pauses, fewer mistakes, faster killing, better flow, better drop
 <br>
 
 ## 4. Moneybags and Golddigger mode
-//TODO
+The **Moneybags** system highlights items that provide an excellent **gold-to-inventory-space ratio**, allowing players to quickly identify loot that is worth picking up purely for selling.
+
+Instead of treating all vendor trash equally, the filter evaluates items by their **physical size** and **vendor price**, then visually marks the most efficient gold sources.
+
+Items are grouped by inventory footprint:
+
+- **2×1 items** shown as $$$
+  Examples: wands, small orbs, throwing weapons, small daggers or belts (1x2)
+
+- **3×1 items** shown as $$
+  Visible only in Golddigger mode
+  Examples: short staves, maces, assassin weapons, quivers
+
+- **2×2 items** shown as $
+  Visible only in Golddigger mode
+  Examples: helmets, gloves, boots, paladin shields
+
+Additionally to regular moneybags $$$ other smaller bags are visible only in Golddigger mode which also show gold stacks and mark those on map as well. Bigger stacks are marked with bigger dot so you can easily see gold clusters.
 
 <br>
 

@@ -14,13 +14,15 @@
 <h3>!!! -------------------------------------------------------------------------------------------------------------------- !!!</h3>
 
 $${\color{red}Currently \space this \space loot \space filter \space is \space still \space work \space in \space progress, \space but \space every \space unchecked \space item \space is \space selected \space as \space God \space to \space not \space hide \space anything \space by \space mistake}$$
-
-If you wanna help develop this loot filter you can use this GitHub page and [create new issue](https://github.com/orzel403/OrzelLootFilter/issues) to discuss
-
 <h3>-------------------------------------------------------------------------------------------------------------------------</h3>
 
 <br>
-//TODO Donation link
+
+## Help
+
+If you wanna [help develop this loot filter](https://github.com/orzel403/OrzelLootFilter/issues) you can use this GitHub page and create new issue to discuss.<br>
+If you wanna [support my work you can donate some gold here](https://www.paypal.com/donate/?hosted_button_id=V6M35JL8PWJ8J)
+
 <br>
 
 ## Overview
@@ -38,13 +40,11 @@ The filter is published with customization in mind. It is optional since default
 The filter was built around a few core principles:
 
 - Divide loot by **item's level**, (not item's ingame rarity alone):
-  - Low: worth less than 1 wss, good when building new char with no backup gear
-  - Mid: worth more than 1 wss
-  - God: worth high runes or just high demand
 - **Might corrupt** system (Shows which item is worth corrupting and which ones are most valuable)
 - Allows unfilter items for **Crafters** to quickly collect needed bases
 - Adds **Moneybags** and **Golddigger** mode to easy and fast (if needed) gold collection
 - Support **newer players** with contextual hints (e.g. rune values, wss converter etc)
+- Do not make game PD2 color full like other filters or like Diablo 3 cow level (wink)
 - Don't hide anything (including gold) while in the city. That's often issue with other loot filters
 - Keep the screen readable in high-density situations
 - Allow users to control how aggressive the filtering is
@@ -53,32 +53,46 @@ In short: fewer pauses, fewer mistakes, faster killing, better flow, better drop
 
 <br>
 
-## Might corrupt
-//TODO
+## Item level
+
+Every unique and set item in this loot filter has it's own item level. Do not confuse it with ingame rarity model (white, blue, yellow etc.) instead think about those level as worthness.<br>
+You can filter specific level - more about it in [Filter levels](#filter-levels)). Moreover you can edit those level to your likings using [Editor](#editor)).
+
+| Key  | Visuals                                                | Description                                                             |
+|------|--------------------------------------------------------|-------------------------------------------------------------------------|
+| Low  | regular tan or green color                             | worth less than 1 wss, good when building new char with no backup gear  |
+| Mid  | regular wrapped in yellow $${\color{goldenrod}>> <<}$$ | worth more than 1 wss                                                   |
+| God  | regular wrapped in purple $${\color{orchid}>> <<}$$    | worth high runes or just high demand                                    |
 
 <br>
 
-## Moneybags and Golddigger mode
-The $${\color{limegreen}Moneybags}$$ system highlights items that provide an excellent **gold-to-inventory-space ratio**, allowing players to quickly identify loot that is worth picking up purely for selling.
+## Might corrupt
+Every item no matter its item level might be worth to corrupt. Those "mc" items names are wrapped in red $${\color{red}>> <<}$$ and add "+mc" suffix to their names. When identified and not corrupted yet it will also show you what corrupt is the most valuable for those items. The goal is to reduce the need to go to the website and search for specific items.
 
-Instead of treating all vendor trash equally, the filter evaluates items by their **physical size** and **vendor price**, then visually marks the most efficient gold sources.
+<img width="961" height="688" alt="image" src="https://github.com/user-attachments/assets/5eb40919-d0b4-4c51-856f-25fc23f49660" />
 
-<img width="1279" height="720" alt="image" src="https://github.com/user-attachments/assets/de203d67-f401-43d9-9ca5-81967cc62f0e" />
+<br>
 
-Items are grouped by inventory footprint:
+Currently supported corruptions:
 
-- **2×1** items shown as $${\color{limegreen}SSS}$$<br>
-  _Examples: wands, small orbs, throwing weapons, small daggers or belts (1x2)_
-
-- **3×1 items** shown as $${\color{limegreen}SS}$$<br>
-  ! Visible only in Golddigger mode !<br>
-  _Examples: short staves, maces, assassin weapons, quivers_
-
-- **2×2 items** shown as $${\color{limegreen}S}$$<br>
-  ! Visible only in Golddigger mode !<br>
-  _Examples: helmets, gloves, boots, paladin shields_
-
-Additionally to regular moneybags $$$ other smaller bags are visible only in Golddigger mode which also shows gold stacks and mark those on map as well. Bigger stacks are marked with bigger dot so you can easily see gold clusters.
+| Editor/ingame short  | Full ingame name                                         |
+|----------------------|----------------------------------------------------------|
+| CBF                  | Cannot be frozen                                         |
+| IAS                  | Increased attack speed                                   |
+| DStrike              | Deadly strike                                            |
+| EDmg                 | Enhanced damage                                          |
+| FCR                  | Faster cast rate                                         |
+| FCR+SKDmg            | Faster cast rate + [Elemental] skill damage              |
+| FHR                  | Faster hit recovery                                      |
+| SK                   | All skills                                               |
+| SOX                  | Socketed (the more the better)                           |
+| 3SOX                 | Socketed (3 is the most valuable)                        |
+| 6SOX                 | Socketed (6 is the most valuable)                        |
+| MF                   | Better chance of getting magic items (magic find)        |
+| LLeech               | Life stolen per hit (life leech)                         |
+| Pierce               | Chance to pierce                                         |
+| RES                  | All resistance                                           |
+| Random               | A few might be worth, need to check after corruption     |
 
 <br>
 
@@ -100,13 +114,41 @@ Additional to all of the above you might wanna set your own map likeness. To do 
 <br>
 
 ## Crafters
-//TODO
+If you are crafter you know how painfull it might be to find item bases (if you cannot buy them from vendors). To speed things up you need to modify 'CRAFTER' alias in filter file or preferably use [Editor](#editor) instead. Note that by default it's empty list and no item will be shown as craft items. Note that even if item exists it shows only items with affix level > 70.<br>
+When everything is set up correctly you will start to see orange items with prefix "Craft of [item name]". After identification you will see its additional info: worth crafting tag, current tier + upgrade recipes, possible crafting recipes.
+
+<img width="1057" height="612" alt="image" src="https://github.com/user-attachments/assets/465281d5-dbc7-4a24-a0b6-21c48da6dabe" />
+
+<br>
+
+## Moneybags and Golddigger mode
+The $${\color{limegreen}Moneybags}$$ system highlights items that provide an excellent **gold-to-inventory-space ratio**, allowing players to quickly identify loot that is worth picking up purely for selling.
+
+Instead of treating all vendor trash equally, the filter evaluates items by their **physical size** and **vendor price**, then visually marks the most efficient gold sources.
+
+<img width="1279" height="574" alt="image" src="https://github.com/user-attachments/assets/1ecf6108-dd47-4cd7-9dbb-6d8d75f96e7b" />
+
+Items are grouped by inventory footprint:
+
+- **2×1** items shown as $${\color{limegreen}SSS}$$<br>
+  _Examples: wands, small orbs, throwing weapons, small daggers or belts (1x2)_
+
+- **3×1 items** shown as $${\color{limegreen}SS}$$<br>
+  ! Visible only in Golddigger mode !<br>
+  _Examples: short staves, maces, assassin weapons, quivers_
+
+- **2×2 items** shown as $${\color{limegreen}S}$$<br>
+  ! Visible only in Golddigger mode !<br>
+  _Examples: helmets, gloves, boots, paladin shields_
+
+Additionally to regular moneybags $$$ other smaller bags are visible only in Golddigger mode which also shows gold stacks and mark those on map as well. Bigger stacks are marked with bigger dot so you can easily see gold clusters.
 
 <br>
 
 ## Editor
 
-You are encouraged to treat this filter as a framework, not a black box. That's why I created Editor, so you can easly manipulate filter so it could always be the most perfect fit for you.
+You are encouraged to treat this filter as a framework, not a black box. That's why I created Editor for users to easly manipulate its content, to always be the most perfect fit for your current needs.
+TODO
 
 <br>
 
@@ -130,9 +172,7 @@ Note that whatever description you see ingame when changing levels is exactly wh
 Note! Hidden items have additional 1 level gap. While being hidden (not completly) item is displayed as rotated exclamation mark **¡**, when unhidden are mark with regular **!**.
 Unhidden (visible even on upper level filters) by default are [rare]: amulets, rings, gloves, belt, boots (all-class items). <br>
 To modify what stays unhidden you need to modify 'UNHIDE' alias in filter file or preferably use [Editor](#editor) instead.
-<img width="1135" height="541" alt="image" src="https://github.com/user-attachments/assets/9497c887-72d2-4725-822a-f514a3676a76" />
-
-
+<img width="1176" height="537" alt="image" src="https://github.com/user-attachments/assets/53bf96d2-6084-4eef-80ce-a11e1c9c1b79" />
 
 | Level  | Name                                     | Description                                                                          |
 |--------|------------------------------------------|--------------------------------------------------------------------------------------|
@@ -150,7 +190,7 @@ To modify what stays unhidden you need to modify 'UNHIDE' alias in filter file o
 | 11     | Golddigger                               | Read more about Golddigger mode                                                      |
 | 12     | God mode (minimalistic)                  | Shows only items with level God and R+ potions                                       |
 
-To check above list but in more specific view check TODO
+To check specific items list with their full info check TODO
 
 The rules scale with progression, so the filter evolves naturally as the character moves from leveling into endgame farming but that was mainly imported from Wolfie's base loot filter.
 
@@ -163,11 +203,11 @@ Colors in Orzel’s Loot Filter are semantic, not only decorative. Gear's names 
 There are a few colors in main palette:
 | Color                                                                                                                              | Item groups                                   |
 |------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
-| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/bdad79ac-8e22-405f-bd6d-ab5205bef309" />   | Runes, Keys                                   |
+| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/bdad79ac-8e22-405f-bd6d-ab5205bef309" />   | Runes, Keys, Crafter items                    |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/f4b47f63-e3ab-4ff7-9923-e045072ec18e" />   | Materials, Might corrupts                     |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/0644dbfb-98fe-4af1-970a-5305b112efc1" />   | Gems (with addition of corresponding color    |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/631eb7a9-d6cd-49c2-955a-aaae4f2b77c6" />   | Maps                                          |
-| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/631eb7a9-d6cd-49c2-955a-aaae4f2b77c6" />   | Jewels                                        |
+| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/d0796604-19d4-4c13-884e-e40e9ee91992" />   | Jewels                                        |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/dc86fbf9-9bcc-4ccb-a120-502ed1f471d9" />   | Charms                                        |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/79fb4841-8b98-4ecb-a70a-5b365a0c3f36" />   | Catalyst shards, Rev potions                  |
 
@@ -176,7 +216,7 @@ There are a few colors in main palette:
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/e8789a47-2aec-4249-afae-3ca1fccb16a7" />   | Unique                                        |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/2700a816-4732-46d7-8402-86acaab38b21" />   | Rare                                          |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/09f06701-9792-4231-932a-6423a4ab8b7a" />   | Magic                                         |
-| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/bdad79ac-8e22-405f-bd6d-ab5205bef309" />   | Craft                                         |
+| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/bdad79ac-8e22-405f-bd6d-ab5205bef309" />   | Crafted                                       |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/0644dbfb-98fe-4af1-970a-5305b112efc1" />   | Eth, Socket                                   |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/cae4a8dc-d2c8-403c-8a24-e673059bcd97" />   | Normal                                        |
 
@@ -212,6 +252,8 @@ This is a filter, not an oracle.
 <br>
 
 ## Credits
+
+If you wanna [support my work you can donate some gold here](https://www.paypal.com/donate/?hosted_button_id=V6M35JL8PWJ8J)
 
 - Built for **Project Diablo 2 – Season 12**
 - Based on [Wolfie's loot filter](https://github.com/WolfieeifloW/pd2filter/)

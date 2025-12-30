@@ -13,7 +13,8 @@
 
 <h3>!!! -------------------------------------------------------------------------------------------------------------------- !!!</h3>
 
-Currently this loot filter is still work in progress, but every unchecked item is selected as God to not hide anything by mistake<br>
+$${\color{red}Currently \space this \space loot \space filter \space is \space still \space work \space in \space progress, \space but \space every \space unchecked \space item \space is \space selected \space as \space God \space to \space not \space hide \space anything \space by \space mistake}$$
+
 If you wanna help develop this loot filter you can use this GitHub page and [create new issue](https://github.com/orzel403/OrzelLootFilter/issues) to discuss
 
 <h3>-------------------------------------------------------------------------------------------------------------------------</h3>
@@ -22,17 +23,17 @@ If you wanna help develop this loot filter you can use this GitHub page and [cre
 //TODO Donation link
 <br>
 
-## 1. Overview
+## Overview
 
 Orzel’s Loot Filter is designed to reduce cognitive overload without hiding useful information. Instead of treating loot as a binary show / don’t show problem, the filter classifies items by **value potential**.
 
 Items are divided into meaningful tiers called item's level (**Low**, **Mid**, **God**), corruption candidates are explicitly highlighted called **Might corrupt**, crafting bases are surfaced intentionally and endgame content such as maps is made easier to identify and pick up. The goal is not to decide for the player, but to make good decisions faster.
 
-The filter is published with customization in mind. It is optional since default value will fit most of the players. If you willing to modify this loot filter read more about [Orzel's Loot Filter Editor](README.md#6-editor)
+The filter is published with customization in mind. It is optional since default value will fit most of the players. If you willing to modify this loot filter read more about [Orzel's Loot Filter Editor](#editor)
 
 <br>
 
-## 2. Design Goals
+## Design Goals
 
 The filter was built around a few core principles:
 
@@ -52,59 +53,86 @@ In short: fewer pauses, fewer mistakes, faster killing, better flow, better drop
 
 <br>
 
-## 3. Might corrupt
+## Might corrupt
 //TODO
 
 <br>
 
-## 4. Moneybags and Golddigger mode
-The **Moneybags** system highlights items that provide an excellent **gold-to-inventory-space ratio**, allowing players to quickly identify loot that is worth picking up purely for selling.
+## Moneybags and Golddigger mode
+The $${\color{limegreen}Moneybags}$$ system highlights items that provide an excellent **gold-to-inventory-space ratio**, allowing players to quickly identify loot that is worth picking up purely for selling.
 
 Instead of treating all vendor trash equally, the filter evaluates items by their **physical size** and **vendor price**, then visually marks the most efficient gold sources.
 
+<img width="1279" height="720" alt="image" src="https://github.com/user-attachments/assets/de203d67-f401-43d9-9ca5-81967cc62f0e" />
+
 Items are grouped by inventory footprint:
 
-- **2×1 items** shown as $$$
-  Examples: wands, small orbs, throwing weapons, small daggers or belts (1x2)
+- **2×1** items shown as $${\color{limegreen}SSS}$$<br>
+  _Examples: wands, small orbs, throwing weapons, small daggers or belts (1x2)_
 
-- **3×1 items** shown as $$
-  Visible only in Golddigger mode
-  Examples: short staves, maces, assassin weapons, quivers
+- **3×1 items** shown as $${\color{limegreen}SS}$$<br>
+  ! Visible only in Golddigger mode !<br>
+  _Examples: short staves, maces, assassin weapons, quivers_
 
-- **2×2 items** shown as $
-  Visible only in Golddigger mode
-  Examples: helmets, gloves, boots, paladin shields
+- **2×2 items** shown as $${\color{limegreen}S}$$<br>
+  ! Visible only in Golddigger mode !<br>
+  _Examples: helmets, gloves, boots, paladin shields_
 
-Additionally to regular moneybags $$$ other smaller bags are visible only in Golddigger mode which also show gold stacks and mark those on map as well. Bigger stacks are marked with bigger dot so you can easily see gold clusters.
+Additionally to regular moneybags $$$ other smaller bags are visible only in Golddigger mode which also shows gold stacks and mark those on map as well. Bigger stacks are marked with bigger dot so you can easily see gold clusters.
 
 <br>
 
-## 5. Maps selection
+## Maps selection
+All maps are colored the same <img width="10" height="10" alt="image" src="https://github.com/user-attachments/assets/631eb7a9-d6cd-49c2-955a-aaae4f2b77c6" /> sage color. 
+
+<img width="940" height="469" alt="image" src="https://github.com/user-attachments/assets/ed527059-60c8-4129-96dd-ae399da66fe2" />
+
+Additional to their name they have prefix which is map's tier. Also color of that prefix shows map ingame rarity: white = normal, blue = magic and yellow = rare.<br>
+Additional to all of the above you might wanna set your own map likeness. To do it you need to modify 'MAPLIKED', 'MAPMEDIUM' and 'MAPHATE' aliases in filter file or preferably use [Editor](#editor) instead. It will allows to show map suffixes to fit your likings.
+
+
+| Possible prefix (tier)                             | Possible suffix                                |
+|----------------------------------------------------|------------------------------------------------|
+| [ $${\color{gray}T1}$$ ]                           | $${\color{red}¼}$$ - maps you don't like       |
+| [ $${\color{blue}° \space T2 \space °}$$ ]         | $${\color{blue}½}$$ - maps other maps          |
+| [ $${\color{goldenrod}°° \space T3 \space °°}$$ ]  | $${\color{limegreen}¾}$$ - maps you like       |
+
+<br>
+
+## Crafters
 //TODO
 
 <br>
 
-## 6. Crafters
-//TODO
-
-<br>
-
-## 7. Editor
+## Editor
 
 You are encouraged to treat this filter as a framework, not a black box. That's why I created Editor, so you can easly manipulate filter so it could always be the most perfect fit for you.
 
 <br>
 
-## 8. Filter levels
+## Filter levels
 
-There are a few loot filter's levels that allows you to modify what is display under Alt key. 
-I recommend bind eg. **<** and **>** keys to **Increase filter level** and **Decrease filter level** in **Configure hotkeys** menu option. 
-I would also recommend to set **[** and **\]** to favourite levels to quickly change it. 
-My bindings are: **[** level 7 for crafting materials, **\]** level 9 for regular map runs, **=** for God mode, **Backspace** to turn off filter completly (quick check up)
+There are a few loot filter's levels that allows you to modify what is display under Alt key. I recommend bind some hotkeys in **Configure hotkeys** menu option. I would also recommend set some keys to your favourite levels to quick change. <br>
+My bindings are:
+
+| Key              | Description                                    |
+|------------------|------------------------------------------------|
+| **<**            | decrease filter level                          |
+| **>**            | increase filter level                          |
+| **[**            | level 7 for finding crafting materials         |
+| **\]**           | level 9 for regular map runs                   |
+| **=**            | level 12 (God mode) for running quick maps     |
+| **Backspace**    | to turn off filter completly (quick check up)  |
+| **Num -**        | to reload (eg. after using [Editor](#editor))  |
 
 Note that whatever description you see ingame when changing levels is exactly what you will see/not see!
 
-Note! Hidden items have additional 1 level gap. While being hidden (not completly) item is displayed as rotated exclamation mark **¡**, when unhidden are mark with regular **!**
+Note! Hidden items have additional 1 level gap. While being hidden (not completly) item is displayed as rotated exclamation mark **¡**, when unhidden are mark with regular **!**.
+Unhidden (visible even on upper level filters) by default are [rare]: amulets, rings, gloves, belt, boots (all-class items). <br>
+To modify what stays unhidden you need to modify 'UNHIDE' alias in filter file or preferably use [Editor](#editor) instead.
+<img width="1135" height="541" alt="image" src="https://github.com/user-attachments/assets/9497c887-72d2-4725-822a-f514a3676a76" />
+
+
 
 | Level  | Name                                     | Description                                                                          |
 |--------|------------------------------------------|--------------------------------------------------------------------------------------|
@@ -128,7 +156,7 @@ The rules scale with progression, so the filter evolves naturally as the charact
 
 <br>
 
-## 9. Colors & Visuals
+## Colors & Visuals
 
 Colors in Orzel’s Loot Filter are semantic, not only decorative. Gear's names are modified mostly when item is unidentified, after that i goes to regular description to not irritate the eye. To understand it better please read notes below.
 
@@ -138,9 +166,12 @@ There are a few colors in main palette:
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/bdad79ac-8e22-405f-bd6d-ab5205bef309" />   | Runes, Keys                                   |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/f4b47f63-e3ab-4ff7-9923-e045072ec18e" />   | Materials, Might corrupts                     |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/0644dbfb-98fe-4af1-970a-5305b112efc1" />   | Gems (with addition of corresponding color    |
-| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/79fb4841-8b98-4ecb-a70a-5b365a0c3f36" />   | Catalyst shards                               |
+| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/631eb7a9-d6cd-49c2-955a-aaae4f2b77c6" />   | Maps                                          |
+| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/631eb7a9-d6cd-49c2-955a-aaae4f2b77c6" />   | Jewels                                        |
+| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/dc86fbf9-9bcc-4ccb-a120-502ed1f471d9" />   | Charms                                        |
+| <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/79fb4841-8b98-4ecb-a70a-5b365a0c3f36" />   | Catalyst shards, Rev potions                  |
 
-| Color                                                                                                                              | Item rarity (no change from vanilla colors)   |
+| Color                                                                                                                              | Items rarity                                  |
 |------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/e8789a47-2aec-4249-afae-3ca1fccb16a7" />   | Unique                                        |
 | <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/2700a816-4732-46d7-8402-86acaab38b21" />   | Rare                                          |
@@ -153,12 +184,12 @@ Nothing is colored “because it looks nice”. If it stands out, it has a reaso
 
 <br>
 
-## 10. Installation
+## Installation
 
-1. Download the loot filter file 
-2. Place it in your Project Diablo 2 loot filter directory (...Diablo II\ProjectD2\filters\local)
-3. Select the filter in-game from the loot filter menu  
-4. Adjust filter level editor if applicable:
+- Download the loot filter file 
+- Place it in your Project Diablo 2 loot filter directory (...Diablo II\ProjectD2\filters\local)
+- Select the filter in-game from the loot filter menu  
+- Adjust filter level editor if applicable:
   - To install editor download orzel.html file
   - Editor is standalone, runs locally in browser, doesnt need any server, nothing
   - Place editor html file to the same location as loot filter file
@@ -168,9 +199,10 @@ No external tools required.
 
 <br>
 
-## 11. Known Limitations
+## Known Limitations
 
-- !! Currently this loot filter is still work in progress, but every unchecked item is selected as God to not hide anything by mistake !! 
+$${\color{red}Currently \space this \space loot \space filter \space is \space still \space work \space in \space progress, \space but \space every \space unchecked \space item \space is \space selected \space as \space God \space to \space not \space hide \space anything \space by \space mistake}$$
+
 - Item value is contextual and meta-dependent; no filter can predict every market shift
 - The filter reflects the author’s valuation logic, which may differ from niche playstyles
 - Extreme build-specific needs may require manual adjustments
@@ -179,7 +211,7 @@ This is a filter, not an oracle.
 
 <br>
 
-## 12. Credits
+## Credits
 
 - Built for **Project Diablo 2 – Season 12**
 - Based on [Wolfie's loot filter](https://github.com/WolfieeifloW/pd2filter/)
